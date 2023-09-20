@@ -43,7 +43,6 @@ export const RealTimeEditor = memo(
      * If no/invalid data is returned, it tries again every 3 seconds.
      */
     async function initializeData() {
-      console.log("Init data")
       const { version, doc } = await getDocument(socket, userId);
 
       // If no data is returned, try again in 3 seconds
