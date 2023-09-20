@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, {useCallback, useEffect, useState} from "react";
 
 import { Socket } from "socket.io-client";
 
 import { CodeEditor } from "./editor";
-import { getDocument } from "./extentions/collab";
+import { getDocument } from "../../codemirror/extensions/collab";
 
 interface State {
   connected: boolean;
@@ -34,32 +34,48 @@ export const RealTimeCodeEditor = ({
     doc: undefined,
   });
 
-  const getStartData = (): void => {
-    getDocument(socket).then(({ version, doc }) => {
-      if (version === undefined || !doc) {
-        setTimeout(() => {
-          getStartData();
-        }, 3000);
-        return;
-      }
+  /**
+   * Gets and sets the initial document data.
+   * If no/invalid data is returned, it tries again every 3 seconds.
+   */
+  async function initializeData() {
+    const { version, doc } = await getDocument(socket, roomId);
 
-      setState((prev) => ({
-        ...prev,
-        version,
-        connected: true,
-        // eslint-disable-next-line @typescript-eslint/no-base-to-string
-        doc: doc?.toString(),
-      }));
-    });
-  };
+    // If no data is returned, try again in 3 seconds
+    if (version === undefined || !doc) {
+      setTimeout(() => {
+        initializeData();
+      }, 3000);
+      return;
+    }
+
+    setState((prev) => ({
+      ...prev,
+      version,
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
+      doc: doc?.toString(),
+    }));
+  }
+
+  const initializeConnection = useCallback(async () => {
+    socket.emit(connectionType === "connect" ? "joinRoom" : "create", roomId);
+    await initializeData();
+  }, [socket, initializeData]);
 
   useEffect(() => {
     socket.open();
-    socket.emit(connectionType === "connect" ? "joinRoom" : "create", roomId);
 
-    getStartData();
+    if(socket.connected) {
+      void initializeConnection();
+      setState((prev) => ({
+        ...prev,
+        connected: true,
+      }));
+    } else {
+      socket.once("connect", initializeConnection);
+    }
 
-    socket.on("connection", () => {
+    socket.on("connect", () => {
       setState((prev) => ({
         ...prev,
         connected: true,
@@ -80,9 +96,6 @@ export const RealTimeCodeEditor = ({
       );
       socket.off("connect");
       socket.off("disconnect");
-      socket.off("pullUpdateResponse");
-      socket.off("pushUpdateResponse");
-      socket.off("getDocumentResponse");
       socket.close();
     });
 
@@ -98,13 +111,10 @@ export const RealTimeCodeEditor = ({
       );
       socket.off("connect");
       socket.off("disconnect");
-      socket.off("pullUpdateResponse");
-      socket.off("pushUpdateResponse");
-      socket.off("getDocumentResponse");
       socket.close();
       socket.disconnect();
     };
-  }, []);
+  }, [roomId]);
 
   if (
     state?.version === undefined ||

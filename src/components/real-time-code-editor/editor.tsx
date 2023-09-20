@@ -14,8 +14,8 @@ import { Socket } from "socket.io-client";
 import { voidFunction } from "@utils";
 
 import { State } from "../../sections/teacher-panel/code-panel/work-space/blocks/code-editor-block";
-import { peerExtension } from "./extentions/collab";
-import { cursorExtension } from "./extentions/cursors";
+import { peerExtension } from "../../codemirror/extensions/collab";
+import { cursorExtension } from "../../codemirror/extensions/cursors";
 
 interface IEditor {
   state: State;

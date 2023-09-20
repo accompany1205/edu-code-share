@@ -20,14 +20,12 @@ async function pushUpdates(
   const updates = fullUpdates.map((u) => ({
     clientID: u.clientID,
     changes: u.changes.toJSON(),
-    effects: u.effects ?? [],
+    effects: u.effects,
   }));
 
   return await new Promise(function (resolve) {
-    socket.emit("pushUpdates", version, JSON.stringify(updates));
-
-    socket.once("pushUpdateResponse", function (status: boolean) {
-      resolve(status);
+    socket.emit("pushUpdates", version, JSON.stringify(updates), (status: boolean) => {
+      return resolve(status);
     });
   });
 }
@@ -37,15 +35,13 @@ async function pullUpdates(
   version: number
 ): Promise<readonly Update[]> {
   return await new Promise(function (resolve) {
-    socket.emit("pullUpdates", version);
-
-    socket.once("pullUpdateResponse", function (updates) {
-      resolve(JSON.parse(updates));
+    socket.emit("pullUpdates", version, (updates: string) => {
+      return resolve(JSON.parse(updates));
     });
   }).then((updates: any) =>
     updates.map((u: any) => {
       if (u.effects?.[0]) {
-        const effects: Array<StateEffect<unknown>> = [];
+        const effects: Array<StateEffect<any>> = [];
 
         u.effects.forEach((effect: StateEffect<any>) => {
           if (effect.value?.id && effect.value?.from) {
@@ -79,15 +75,14 @@ async function pullUpdates(
 }
 
 export async function getDocument(
-  socket: Socket
+  socket: Socket,
+  roomId: string
 ): Promise<{ version: number; doc: Text }> {
   return await new Promise(function (resolve) {
-    socket.emit("getDocument");
-
-    socket.once("getDocumentResponse", function (version: number, doc: string) {
-      resolve({
+    socket.emit("getDocument", roomId, (version: number, doc: string) => {
+      return resolve({
         version,
-        doc: Text.of(doc.split("\n")),
+        doc: Text.of(doc?.length ? doc.split("\n") : [""]),
       });
     });
   });
@@ -104,16 +99,16 @@ export const peerExtension = (
       private done = false;
 
       constructor(private readonly view: EditorView) {
-        this.pull();
+        void this.pull();
       }
 
       update(update: ViewUpdate): void {
-        if (update.docChanged || update.transactions.length) this.push();
+        if (update.docChanged || update.transactions.length) void this.push();
       }
 
       async push(): Promise<void> {
         const updates = sendableUpdates(this.view.state);
-        if (!updates.length || this.pushing) return;
+        if (this.pushing || !updates.length) return;
         this.pushing = true;
         const version = getSyncedVersion(this.view.state);
         await pushUpdates(socket, version, updates);
@@ -123,11 +118,8 @@ export const peerExtension = (
         if (sendableUpdates(this.view.state).length) {
           setTimeout(async () => {
             await this.push();
-          }, 0);
+          }, 100);
         }
-
-        // Regardless of whether the push failed or new updates came in
-        // while it was running, try again if there's updates remaining
       }
 
       async pull(): Promise<void> {

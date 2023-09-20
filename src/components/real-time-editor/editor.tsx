@@ -9,8 +9,8 @@ import { Socket } from "socket.io-client";
 import { dracula } from "thememirror";
 
 import { State } from ".";
-import { peerExtension } from "./extentions/collab";
 import { initListeners, removeListeners } from "./listeners";
+import { peerExtension } from "../../codemirror/extensions/collab";
 
 interface IEditor {
   state?: State;

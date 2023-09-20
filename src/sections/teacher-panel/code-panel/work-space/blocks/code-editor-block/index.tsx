@@ -50,7 +50,7 @@ ICodeEditorBlock): React.ReactElement | null => {
       ) : null}
       <RealTimeCodeEditor
         socket={socket}
-        roomId={query?.id as string}
+        roomId={query?.studentId as string}
         colabCursonId={user?.email}
         colabCursonText={`${user?.first_name}`}
         onChangeCode={(code) => {
