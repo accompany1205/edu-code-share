@@ -134,6 +134,7 @@ export const RealTimeCodeEditor = ({
         `}
       </style>
       <CodeEditor
+        roomId={roomId}
         onChangeCode={onChangeCode}
         state={state}
         cursorId={colabCursonId}

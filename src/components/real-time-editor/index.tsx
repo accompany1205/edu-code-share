@@ -43,22 +43,21 @@ export const RealTimeEditor = memo(
      * If no/invalid data is returned, it tries again every 3 seconds.
      */
     async function initializeData() {
-      const { version, doc } = await getDocument(socket, userId);
-
-      // If no data is returned, try again in 3 seconds
-      if (version === undefined || !doc) {
-        setTimeout(() => {
-          initializeData();
-        }, 3000);
-        return;
+      try {
+        const { version, doc } = await getDocument(socket, userId);
+        setState((prev) => ({
+          ...prev,
+          version: version,
+          doc: doc.toString(),
+        }));
+      } catch(e) {
+        // If no data is returned, set up data for offline editing
+        setState((prev) => ({
+          ...prev,
+          version: 0,
+          doc: "",
+        }));
       }
-
-      setState((prev) => ({
-        ...prev,
-        version,
-        // eslint-disable-next-line @typescript-eslint/no-base-to-string
-        doc: doc?.toString(),
-      }));
     }
 
     const initializeConnection = useCallback(async () => {
@@ -70,17 +69,16 @@ export const RealTimeEditor = memo(
       if (!userId) return;
       socket.open();
 
+      void initializeConnection();
       if(socket.connected) {
-        void initializeConnection();
         setState((prev) => ({
           ...prev,
           connected: true,
         }));
-      } else {
-        socket.once("connect", initializeConnection);
       }
 
       socket.on("connect", () => {
+        void initializeConnection();
         setState((prev) => ({
           ...prev,
           connected: true,
@@ -111,8 +109,7 @@ export const RealTimeEditor = memo(
 
     if (
       state?.version === undefined ||
-      state?.doc === undefined ||
-      !state.connected
+      state?.doc === undefined
     ) {
       return <EditorSkeleton />;
     }
@@ -128,6 +125,7 @@ export const RealTimeEditor = memo(
         `}
         </style>
         <CodeEditor
+          roomId={userId}
           state={state}
           cursorId={userId}
           preloadedCode={preloadedCode}

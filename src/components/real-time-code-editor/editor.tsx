@@ -18,6 +18,7 @@ import { peerExtension } from "../../codemirror/extensions/collab";
 import { cursorExtension } from "../../codemirror/extensions/cursors";
 
 interface IEditor {
+  roomId: string;
   state: State;
   cursorId: string;
   cursorText: string;
@@ -26,6 +27,7 @@ interface IEditor {
 }
 
 export const CodeEditor = ({
+  roomId,
   state,
   cursorId,
   cursorText,
@@ -50,7 +52,7 @@ export const CodeEditor = ({
         indentUnit.of("\t"),
         basicSetup(),
         langs.html(),
-        peerExtension(socket, state.version ?? 0, cursorId),
+        peerExtension(socket, state.version ?? 0, cursorId, roomId),
         cursorExtension(cursorText),
       ],
     });

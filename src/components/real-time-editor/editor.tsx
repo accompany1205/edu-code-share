@@ -13,6 +13,7 @@ import { initListeners, removeListeners } from "./listeners";
 import { peerExtension } from "../../codemirror/extensions/collab";
 
 interface IEditor {
+  roomId?: string;
   state?: State;
   cursorId?: string;
   preloadedCode: string;
@@ -22,6 +23,7 @@ interface IEditor {
 }
 
 export const CodeEditor = ({
+  roomId,
   preloadedCode,
   state,
   cursorId,
@@ -62,8 +64,8 @@ export const CodeEditor = ({
         }),
         lineWrap.of(EditorView.lineWrapping),
         langs.html(),
-        socket && state && cursorId
-          ? peerExtension(socket, state.version ?? 0, cursorId)
+        socket && state && cursorId && roomId
+          ? peerExtension(socket, state.version ?? 0, cursorId, roomId)
           : [],
       ],
     });

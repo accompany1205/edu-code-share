@@ -102,8 +102,7 @@ export default function QuickRabbitsItem({
       }));
     });
 
-    socket.on("codeUpdated", (version, doc) => {
-      console.log("update")
+    socket.on("codeUpdated", (_, version, doc) => {
       setState((prev) => ({
         ...prev,
         version,
