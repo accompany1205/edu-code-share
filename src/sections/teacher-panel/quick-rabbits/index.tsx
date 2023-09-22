@@ -10,7 +10,7 @@ import { QuickRabbitsSideList } from "./quick-rabbits-side-list";
 import { RootState, useSelector } from "src/redux/store";
 import { useDispatch } from "react-redux";
 import { removeRabit } from "src/redux/slices/rabits";
-import {io} from "socket.io-client";
+import { io } from "socket.io-client";
 
 export const QuickRabbits = (): React.ReactElement => {
   const theme = useTheme();
@@ -22,7 +22,7 @@ export const QuickRabbits = (): React.ReactElement => {
     io(process.env.NEXT_PUBLIC_CODE_STREAM_API ?? "", { path: "/" }).open().emit("leaveRoom", userId);
     dispatch(removeRabit({ id: userId }))
     if (userId === query?.id) {
-      push(MANAGER_PATH_DASHBOARD.school.controller(query?.id as string));
+      push(MANAGER_PATH_DASHBOARD.school.controller(query?.id));
     }
   };
 

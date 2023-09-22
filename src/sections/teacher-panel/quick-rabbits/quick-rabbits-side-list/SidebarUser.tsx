@@ -9,7 +9,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import {io} from "socket.io-client";
+import { io } from "socket.io-client";
 
 import {
   IChatMessage,
