@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import { Socket } from "socket.io-client";
 
@@ -39,13 +39,13 @@ export const RealTimeCodeEditor = ({
    */
   async function initializeData() {
     try {
-      const { version, doc } = await getDocument(socket, userId);
+      const { version, doc } = await getDocument(socket, roomId);
       setState((prev) => ({
         ...prev,
-        version: version,
+        version,
         doc: doc.toString(),
       }));
-    } catch(e) {
+    } catch (e) {
       // If no data is returned, set up data for offline editing
       setState((prev) => ({
         ...prev,
@@ -64,7 +64,7 @@ export const RealTimeCodeEditor = ({
     socket.open();
 
     void initializeConnection();
-    if(socket.connected) {
+    if (socket.connected) {
       setState((prev) => ({
         ...prev,
         connected: true,
