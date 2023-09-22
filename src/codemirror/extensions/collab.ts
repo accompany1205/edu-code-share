@@ -26,8 +26,9 @@ async function pushUpdates(
   }));
 
   return await new Promise(function (resolve, reject) {
-    socket.timeout(timeout).emit("pushUpdates", roomId, version, JSON.stringify(updates), (err: unknown, status: boolean, updates: Update[]) => {
+    socket.timeout(timeout).emit("pushUpdates", roomId, version, JSON.stringify(updates), (err: unknown, status: boolean | unknown , updates: Update[]) => {
       if(err) return reject(err);
+      if(typeof status !== "boolean") return reject(new Error("No permission to access this document"));
       return resolve({ status, updates });
     });
   });
@@ -42,7 +43,11 @@ async function pullUpdates(
   return await new Promise(function (resolve, reject) {
     socket.timeout(timeout).emit("pullUpdates", roomId, version, (err: unknown, updates: string) => {
       if(err) return reject(err);
-      return resolve(JSON.parse(updates));
+      try {
+        return resolve(JSON.parse(updates));
+      } catch(e) {
+        reject(new Error("No permission to access this document"));
+      }
     });
   }).then((updates: any) =>
     updates.map((u: any) => {
@@ -86,9 +91,12 @@ export async function getDocument(
   timeout = 3000
 ): Promise<{ version: number; doc: Text }> {
   return await new Promise(function (resolve, reject) {
-    socket.timeout(timeout).emit("getDocument", roomId, (error: unknown, version: number, doc: string) => {
+    socket.timeout(timeout).emit("getDocument", roomId, (error: unknown, version: number | unknown, doc: string) => {
       if(error) {
         return reject(error);
+      }
+      if(typeof version !== "number") {
+        return reject(new Error("No permission to access this document"));
       }
       return resolve({
         version,
