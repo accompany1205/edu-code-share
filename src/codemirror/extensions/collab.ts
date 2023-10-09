@@ -64,9 +64,9 @@ async function pullUpdates(
 
             effects.push(addCursor.of(cursor));
           } else if (effect.value?.id) {
-            const cursorId = effect.value.id;
-
-            effects.push(removeCursor.of(cursorId));
+            // We don't want to remove the cursor on disconnect
+            // const cursorId = effect.value.id;
+            // effects.push(removeCursor.of(cursorId));
           }
         });
 
