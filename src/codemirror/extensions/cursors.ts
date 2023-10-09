@@ -63,6 +63,7 @@ const cursorField = (id: string): StateField<DecorationSet> =>
     },
     update(cursors, tr) {
       let cursorTransacions = cursors.map(tr.changes);
+      console.log(tr)
       for (const e of tr.effects) {
         if (e.is(addCursor)) {
           const addUpdates = [];
@@ -213,7 +214,7 @@ const cursorBaseTheme = EditorView.baseTheme({
 
 export function cursorExtension(id = ""): any[] {
   return [
-    cursorField(""),
+    cursorField(id),
     cursorBaseTheme,
     EditorView.updateListener.of((update) => {
       update.transactions.forEach((e) => {
