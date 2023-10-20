@@ -10,8 +10,6 @@ export * from "./useEventListener";
 export * from "./useFilters";
 export * from "./useMousePosition";
 export * from "./useOffSetTop";
-export * from "./useOnlineConnection";
 export * from "./useResponsive";
 export * from "./useUserActivity";
 export * from "./useWindowDimension";
-export * from "./useOnlineConnection";
