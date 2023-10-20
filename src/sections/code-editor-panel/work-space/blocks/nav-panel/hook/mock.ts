@@ -5,9 +5,9 @@ export const MOCK = [
     id: "ee60b401-524e-465e-abd0-281eab1b46f8"
   },
   {
-    name: "John Aron2",
+    name: "Student Student",
     topic: "js",
-    id: "ole2"
+    id: "6925ef21-08e1-4248-8503-6a07bd1bb934"
   },
   {
     name: "Ole Lucoe2",
