@@ -6,6 +6,7 @@ import { io } from "socket.io-client";
 import EditorSkeleton from "./EditorSkeleton";
 import { CodeEditor } from "./editor";
 import { getDocument } from "../../codemirror/extensions/collab";
+import { useSocket } from "@hooks";
 
 export interface State {
   connected: boolean;
@@ -22,8 +23,6 @@ interface IRealTimeEditor {
   code: string;
 }
 
-const socket = io(process.env.NEXT_PUBLIC_CODE_STREAM_API ?? "", { path: "/" });
-
 // eslint-disable-next-line react/display-name
 export const RealTimeEditor = memo(
   ({
@@ -39,6 +38,8 @@ export const RealTimeEditor = memo(
       version: undefined,
       doc: undefined,
     });
+
+    const socket = useSocket();
 
     /**
      * Gets and sets the initial document data.
