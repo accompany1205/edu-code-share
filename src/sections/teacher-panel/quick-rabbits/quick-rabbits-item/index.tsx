@@ -11,7 +11,6 @@ import { IconButton, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 
 import { Iconify } from "@components";
-import { useRealTimeConnection } from "@hooks";
 import { MANAGER_PATH_DASHBOARD } from "@routes/manager.paths";
 import { Messages } from "@sections/teacher-panel/quick-rabbits/quick-rabbits-item/message";
 import { useGetStudentsQuery } from "src/redux/services/manager/students-manager";
@@ -47,7 +46,6 @@ export default function QuickRabbitsItem({
   const [view, setView] = useState<TabbitView>(
     rabit.email === GROUP_CHAT_RABBIT ? TabbitView.CHAT : TabbitView.CODE
   );
-  useRealTimeConnection(rabit.id);
 
   // Realtime code logic
   const socketIo = useRef(io(process.env.NEXT_PUBLIC_CODE_STREAM_API ?? "", { path: "/" }));
