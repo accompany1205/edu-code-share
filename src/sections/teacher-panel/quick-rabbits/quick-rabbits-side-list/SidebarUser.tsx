@@ -97,7 +97,7 @@ export const SidebarUser = ({
         overlap="circular"
         anchorOrigin={{ vertical: "top", horizontal: "left" }}
         variant="dot"
-        sx={{ backdrop: activityColor }}
+        sx={{ "& .MuiBadge-badge": { bgcolor: activityColor } }}
       >
         <LoaderDelay
           skeleton={<AvatarSkeleton />}
