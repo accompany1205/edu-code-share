@@ -26,6 +26,7 @@ import { SidebarUser } from "./SidebarUser";
 import { SkeletonSidebarUser } from "./SkeletonSidebarUser";
 import { createRabit } from "src/redux/slices/rabits";
 import { useGetClassStudentsQuery } from "src/redux/services/manager/classes-student";
+import { useRoomActivity } from "@hooks";
 
 const drawerWidth = 250;
 export const GROUP_CHAT_RABBIT = "Group Chat";
@@ -81,6 +82,9 @@ export const QuickRabbitsSideList = (): React.ReactElement => {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const [onlineStudents] = useAtom(onlineStudentsAtom);
+
+  // TODO
+  const { getActivityStatus } = useRoomActivity(query.lessonId as string | undefined);
 
   const classId: string = query.id as string;
   const { data, isLoading, isFetching } = useGetClassStudentsQuery(
@@ -181,6 +185,7 @@ export const QuickRabbitsSideList = (): React.ReactElement => {
           : data?.data.map((student, i) => {
               return (
                 <SidebarUser
+                  status={getActivityStatus(student.id)}
                   student={student}
                   key={i.toString() + student.id}
                   isLoading={isLoading}

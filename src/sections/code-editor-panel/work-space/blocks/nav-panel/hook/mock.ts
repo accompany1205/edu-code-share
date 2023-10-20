@@ -1,8 +1,8 @@
 export const MOCK = [
   {
-    name: "Ole Lucoe",
+    name: "Teacher Student",
     topic: "Css",
-    id: "ole1"
+    id: "ee60b401-524e-465e-abd0-281eab1b46f8"
   },
   {
     name: "John Aron2",
@@ -28,7 +28,7 @@ export const MOCK = [
     name: "John Aron4",
     topic: "js",
     id: "ole6"
-  },{
+  }, {
     name: "Ole Lucoe4",
     topic: "Css",
     id: "ole7"
