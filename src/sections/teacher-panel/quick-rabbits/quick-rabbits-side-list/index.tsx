@@ -185,7 +185,7 @@ export const QuickRabbitsSideList = (): React.ReactElement => {
           : data?.data.map((student, i) => {
               return (
                 <SidebarUser
-                  status={getActivityStatus(student.id)}
+                  status={getActivityStatus(student.account.id)}
                   student={student}
                   key={i.toString() + student.id}
                   isLoading={isLoading}
