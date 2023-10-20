@@ -11,7 +11,7 @@ export * from "./useFilters";
 export * from "./useMousePosition";
 export * from "./useOffSetTop";
 export * from "./useResponsive";
-export * from "./useUserActivity";
 export * from "./useWindowDimension";
 export * from "./useSocket";
 export * from "./useRoomActivity";
+export * from "./useSocket";
