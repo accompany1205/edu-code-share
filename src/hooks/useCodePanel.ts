@@ -14,7 +14,6 @@ import { useTheme } from "@mui/material/styles";
 
 import { resetLessonEvent } from "@components";
 // local files
-import { useOnlineConnection } from "@hooks";
 import { STUDENT_PATH_DASHBOARD } from "@routes/student.paths";
 import type { BottomBarProps } from "@sections/code-editor-panel/bottom-bar";
 import { type LessonManagerProps } from "@sections/code-editor-panel/bottom-bar/lesson-manager";
@@ -90,9 +89,6 @@ export const useCodePanel = (): UseCodePanelReturn => {
     },
     [query.id]
   );
-
-  // ONLY LOGINED USER CAN USE
-  useOnlineConnection(user?.id);
 
   const [completeLesson] = useCompleteLessonMutation();
   const [updateLastVisitedDataTrigger] =
