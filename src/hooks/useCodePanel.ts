@@ -12,7 +12,7 @@ import { useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
 // local files
-import { useOnlineConnection, useRealTimeConnection } from "@hooks";
+import { useOnlineConnection } from "@hooks";
 import { STUDENT_PATH_DASHBOARD } from "@routes/student.paths";
 import { isValidLastVisitedData } from "@sections/code-editor-panel/helpers";
 import { getNextLessonId } from "@sections/code-editor-panel/utils/navigation";
@@ -40,11 +40,10 @@ import type { BottomBarProps } from "@sections/code-editor-panel/bottom-bar";
 import type { RootState } from "src/redux/store";
 import { type LessonManagerProps } from "@sections/code-editor-panel/bottom-bar/lesson-manager";
 
-
 interface UseCodePanelReturn {
   workSpaceProps: WorkSpaceProps
   lessonManagerProps: LessonManagerProps
-  bottomBarProps: Omit<BottomBarProps, 'lessonManagerComponent'>
+  bottomBarProps: Omit<BottomBarProps, "lessonManagerComponent">
   isLoadingComplete: boolean
   handle: FullScreenHandle
   isDesktop: boolean
@@ -52,7 +51,7 @@ interface UseCodePanelReturn {
   onConfettiComplete: (confetti?: Confetti) => void
 }
 
-const LANGUAGE = 'html'
+const LANGUAGE = "html"
 
 export const useCodePanel = (): UseCodePanelReturn => {
   const dispatch = useDispatch()
@@ -89,7 +88,6 @@ export const useCodePanel = (): UseCodePanelReturn => {
 
   // ONLY LOGINED USER CAN USE
   useOnlineConnection(user?.id);
-  useRealTimeConnection(user?.id);
 
   const [completeLesson] = useCompleteLessonMutation();
   const [updateLastVisitedDataTrigger] =
@@ -143,7 +141,6 @@ export const useCodePanel = (): UseCodePanelReturn => {
 
     onOpenLesson(lessonId, unitId)
   };
-
 
   useEffect(() => {
     if (!courseContent) return;

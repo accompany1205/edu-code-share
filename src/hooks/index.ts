@@ -15,4 +15,3 @@ export * from "./useResponsive";
 export * from "./useUserActivity";
 export * from "./useWindowDimension";
 export * from "./useOnlineConnection";
-export * from "./useRealTimeConnection";
