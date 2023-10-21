@@ -83,8 +83,7 @@ export const QuickRabbitsSideList = (): React.ReactElement => {
   const [open, setOpen] = useState(false);
   const [onlineStudents] = useAtom(onlineStudentsAtom);
 
-  // TODO
-  const { getActivityStatus } = useRoomActivity(query.lessonId as string | undefined);
+  const { getActivityStatus } = useRoomActivity("all");
 
   const classId: string = query.id as string;
   const { data, isLoading, isFetching } = useGetClassStudentsQuery(
