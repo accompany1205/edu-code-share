@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-base-to-string */
 import React, { memo, useCallback, useEffect, useState } from "react";
 
-import { io } from "socket.io-client";
-
 import EditorSkeleton from "./EditorSkeleton";
 import { CodeEditor } from "./editor";
 import { getDocument } from "../../codemirror/extensions/collab";
 import { useSocket } from "@hooks";
+import { useRouter } from "next/router";
 
 export interface State {
   connected: boolean;
@@ -33,6 +32,7 @@ export const RealTimeEditor = memo(
     preloadedCode,
     code,
   }: IRealTimeEditor): React.ReactElement => {
+    const { query } = useRouter();
     const [state, setState] = useState<State>({
       connected: false,
       version: undefined,
@@ -64,12 +64,12 @@ export const RealTimeEditor = memo(
     }
 
     const initializeConnection = useCallback(async () => {
-      socket.emit("create", userId);
+      socket.emit("create", userId, query.lessonId, window.localStorage?.getItem(`code-${query.id}-${query.lessonId}`) ?? "");
       await initializeData();
-    }, [socket, initializeData]);
+    }, [socket, initializeData, query.id, query.lessonId]);
 
     useEffect(() => {
-      if (!userId) return;
+      if (!userId || !query.lessonId) return;
       socket.open();
 
       void initializeConnection();
@@ -108,7 +108,7 @@ export const RealTimeEditor = memo(
         socket.off("disconnect");
         socket.close();
       };
-    }, [userId]);
+    }, [userId, query.lessonId]);
 
     if (
       state?.version === undefined ||
