@@ -68,12 +68,7 @@ export const useCodePanel = (): UseCodePanelReturn => {
   const searchParams = useSearchParams();
 
   const [confetti, setConfetti] = useState(false);
-  const [code, setCode] = useState<string>(() => {
-    if (typeof window !== "undefined") {
-      return window.localStorage.getItem(`code-${query.id}`) ?? "";
-    }
-    return "";
-  });
+  const [code, setCode] = useState<string>("");
 
   const [lastVisitedData, setLastVisitedData] = useState<LastVisitedState>({
     unitId: null,
@@ -85,9 +80,9 @@ export const useCodePanel = (): UseCodePanelReturn => {
   const onChangeCode = useCallback(
     (code: string) => {
       setCode(code);
-      window.localStorage.setItem(`code-${query.id}`, code);
+      window.localStorage.setItem(`code-${query.id}-${query.lessonId}`, code);
     },
-    [query.id]
+    [query.id, query.lessonId]
   );
 
   const [completeLesson] = useCompleteLessonMutation();
