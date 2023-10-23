@@ -45,8 +45,6 @@ export function useRoomActivity(roomId?: string) {
     return activityStatus[socketId];
   }, [activityStatus]);
 
-  console.log(roomId, activityStatus)
-
   return useMemo(() => ({
     getActivityStatus,
     activityStatus

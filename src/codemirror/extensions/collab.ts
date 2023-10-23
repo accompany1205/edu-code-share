@@ -116,11 +116,9 @@ export const peerExtension = (
     startVersion,
     clientID: id,
     sharedEffects: (tr) => {
-      console.log(tr.effects)
       const effects = tr.effects.filter((e) => {
         return e.is(addCursor) || e.is(removeCursor);
       });
-      console.log(effects)
 
       return effects;
     },
