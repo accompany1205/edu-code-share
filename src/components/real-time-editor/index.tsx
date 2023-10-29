@@ -131,6 +131,7 @@ export const RealTimeEditor = memo(
           roomId={userId}
           state={state}
           cursorId={userId}
+          userId={userId}
           cursorText={cursorText}
           preloadedCode={preloadedCode}
           onChangeCode={onChange}

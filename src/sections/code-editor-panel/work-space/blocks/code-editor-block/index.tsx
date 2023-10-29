@@ -66,7 +66,7 @@ const CodeEditorBlock: FC<ICodeEditorBlock> = ({
       setTyping(true);
     }, deley);
   };
-  
+
   useEffect(() => {
     typingListener(FIRST_LOADING_DELEY, true);
   }, []);
@@ -113,6 +113,7 @@ const CodeEditorBlock: FC<ICodeEditorBlock> = ({
           code={code}
           onChangeCode={onChangeCode}
           preloadedCode={preloadedCode}
+          userId={user?.id}
         />
       )}
 
@@ -139,7 +140,8 @@ const getTitleStyles = (isDesktop: boolean): string => {
   .cm-scroller::-webkit-scrollbar{
     width: 0px;
   }
- 
-`}
+
+`
+}
 
 export default memo(CodeEditorBlock);

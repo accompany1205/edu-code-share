@@ -10,6 +10,7 @@ import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import { Socket } from "socket.io-client";
 
 import { addCursor, removeCursor } from "./cursors";
+import { addComment, removeComment } from "./comments";
 
 async function pushUpdates(
   socket: Socket,
@@ -117,7 +118,7 @@ export const peerExtension = (
     clientID: id,
     sharedEffects: (tr) => {
       const effects = tr.effects.filter((e) => {
-        return e.is(addCursor) || e.is(removeCursor);
+        return e.is(addCursor) || e.is(removeCursor) || e.is(addComment) || e.is(removeComment)
       });
 
       return effects;

@@ -105,6 +105,7 @@ const CodeEditorBlock = ({
           code={code}
           onChangeCode={onChangeCode}
           preloadedCode={preloadedCode}
+          userId={user?.id}
         />
       )}
       <Box sx={{ display: isDesktop ? "none" : "block" }}>
