@@ -55,7 +55,7 @@ function CommentContent({
             />
           </IconButton>
         )}
-        <IconButton>
+        <IconButton className="cm-comment-delete-comment-icon-button">
           <CgClose size={20} className="cm-comment-delete-comment-icon" />
         </IconButton>
       </div>
@@ -141,7 +141,10 @@ const commentField = (): StateField<DecorationSet> =>
         } else if (e.is(removeComment)) {
           comments = comments.update({
             filter: (from, to, value) => {
-              return value?.spec?.id !== e.value;
+              return (
+                value?.spec?.id !== e.value &&
+                value?.spec?.id !== `${e.value}-highlight`
+              );
             },
           });
         } else if (e.is(toggleCommentVisibility)) {
@@ -261,10 +264,32 @@ export function commentsExtension(userId: string): any[] {
                 .closest(".cm-comment")
                 ?.getAttribute("data-comment-id");
               if (!commentId) {
+                // eslint-disable-next-line no-console
                 console.warn("Could not find comment id");
               } else {
                 view.dispatch({
                   effects: toggleCommentVisibility.of(commentId),
+                });
+              }
+            }
+
+            if (
+              (target.nodeName === "BUTTON" &&
+                target.classList.contains(
+                  "cm-comment-delete-comment-icon-button"
+                )) ||
+              (target.nodeName === "svg" &&
+                target.classList.contains("cm-comment-delete-comment-icon"))
+            ) {
+              const commentId = target
+                .closest(".cm-comment")
+                ?.getAttribute("data-comment-id");
+              if (!commentId) {
+                // eslint-disable-next-line no-console
+                console.warn("Could not find comment id");
+              } else {
+                view.dispatch({
+                  effects: removeComment.of(commentId),
                 });
               }
             }
