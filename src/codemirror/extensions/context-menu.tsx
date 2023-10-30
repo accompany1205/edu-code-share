@@ -226,6 +226,7 @@ export function contextMenuExtension(userId: string): any[] {
               const s = view.state.field(selection);
               view.dispatch({
                 effects: addComment.of({
+                  type: "add-comment",
                   id: crypto.randomUUID(),
                   from: s?.from ?? 0,
                   to: s?.to ?? 0,

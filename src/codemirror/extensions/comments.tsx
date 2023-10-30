@@ -23,6 +23,15 @@ export interface Comment {
   content: string;
 }
 
+export interface AddComment extends Comment {
+  type: "add-comment";
+}
+
+export interface RemoveComment {
+  type: "remove-comment";
+  id: string;
+}
+
 export interface Comments {
   comments: Comment[];
 }
@@ -97,8 +106,8 @@ class CommentWidget extends WidgetType {
   }
 }
 
-export const addComment = StateEffect.define<Comment>();
-export const removeComment = StateEffect.define<string>();
+export const addComment = StateEffect.define<AddComment>();
+export const removeComment = StateEffect.define<RemoveComment>();
 
 export const toggleCommentVisibility = StateEffect.define<string>();
 
@@ -142,8 +151,8 @@ const commentField = (): StateField<DecorationSet> =>
           comments = comments.update({
             filter: (from, to, value) => {
               return (
-                value?.spec?.id !== e.value &&
-                value?.spec?.id !== `${e.value}-highlight`
+                value?.spec?.id !== e.value.id &&
+                value?.spec?.id !== `${e.value.id}-highlight`
               );
             },
           });
@@ -269,7 +278,10 @@ export function commentsExtension(userId: string): any[] {
                 console.warn("Could not find comment id");
               } else {
                 view.dispatch({
-                  effects: removeComment.of(commentId),
+                  effects: removeComment.of({
+                    type: "remove-comment",
+                    id: commentId,
+                  }),
                 });
               }
             }
