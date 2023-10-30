@@ -222,26 +222,6 @@ export function commentsExtension(userId: string): any[] {
   return [
     commentField(),
     commentsBaseTheme,
-    EditorView.updateListener.of((update) => {
-      update.transactions.forEach((e) => {
-        if (
-          e.selection &&
-          e.selection.ranges[0].from !== e.selection.ranges[0].to
-        ) {
-          const comment: Comment = {
-            id: crypto.randomUUID(),
-            from: e.selection.ranges[0].from,
-            to: e.selection.ranges[0].to,
-            createdBy: userId,
-            content: "Lorem ipsum",
-          };
-
-          update.view.dispatch({
-            effects: addComment.of(comment),
-          });
-        }
-      });
-    }),
     ViewPlugin.define(
       () => {
         return {
