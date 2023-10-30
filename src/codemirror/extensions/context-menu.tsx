@@ -9,16 +9,22 @@ import {
 } from "@codemirror/view";
 import { createRoot } from "react-dom/client";
 
-import { Grow, MenuItem, MenuList, Paper, Popper } from "@mui/material";
+import { Button, Grow, MenuItem, MenuList, Paper, Popper } from "@mui/material";
+import TextField from "@mui/material/TextField";
 
 import { addComment } from "./comments";
+
+interface ContextMenu {
+  position: ContextMenuPosition;
+  type: "ctx" | "comment";
+}
 
 interface ContextMenuPosition {
   top: number;
   left: number;
 }
 
-export const showContextMenu = StateEffect.define<ContextMenuPosition>();
+export const showContextMenu = StateEffect.define<ContextMenu>();
 export const hideContextMenu = StateEffect.define<boolean>();
 
 export const setSelection = StateEffect.define<SelectionRange>();
@@ -37,14 +43,18 @@ export const selection = StateField.define<SelectionRange | undefined>({
 });
 
 class ContextMenuWidget extends WidgetType {
-  constructor(private readonly position?: ContextMenuPosition) {
+  constructor(
+    private readonly position: ContextMenuPosition | undefined,
+    private readonly contextMenuType: "ctx" | "comment"
+  ) {
     super();
   }
 
   eq(widget: WidgetType): boolean {
     return (
       this.position?.top === (widget as ContextMenuWidget).position?.top &&
-      this.position?.left === (widget as ContextMenuWidget).position?.left
+      this.position?.left === (widget as ContextMenuWidget).position?.left &&
+      this.contextMenuType === (widget as ContextMenuWidget).contextMenuType
     );
   }
 
@@ -101,9 +111,26 @@ class ContextMenuWidget extends WidgetType {
             }}
           >
             <Paper>
-              <MenuList>
-                <MenuItem id="cm-context-menu-comment">Create comment</MenuItem>
-              </MenuList>
+              {this.contextMenuType === "ctx" && (
+                <MenuList>
+                  <MenuItem id="cm-context-menu-comment">
+                    Create comment
+                  </MenuItem>
+                </MenuList>
+              )}
+              {this.contextMenuType === "comment" && (
+                <div className="cm-context-menu-wrapper">
+                  <TextField
+                    label="Comment"
+                    variant="outlined"
+                    inputProps={{ id: "cm-context-menu-comment-input-field" }}
+                    defaultValue="Lorem ipsum"
+                  />
+                  <Button id="cm-context-menu-comment-submit-button">
+                    Submit
+                  </Button>
+                </div>
+              )}
             </Paper>
           </Grow>
         )}
@@ -116,6 +143,15 @@ class ContextMenuWidget extends WidgetType {
     return false;
   }
 }
+
+const contextMenuBaseTheme = EditorView.baseTheme({
+  ".cm-context-menu-wrapper": {
+    display: "flex",
+    columnGap: "8px",
+    alignItems: "center",
+    padding: "8px",
+  },
+});
 
 const contextMenuField = (): StateField<DecorationSet> =>
   StateField.define<DecorationSet>({
@@ -130,7 +166,7 @@ const contextMenuField = (): StateField<DecorationSet> =>
 
           addUpdates.push(
             Decoration.widget({
-              widget: new ContextMenuWidget(e.value),
+              widget: new ContextMenuWidget(e.value.position, e.value.type),
               block: false,
             }).range(0)
           );
@@ -159,6 +195,7 @@ export function contextMenuExtension(userId: string): any[] {
   return [
     contextMenuField(),
     selection,
+    contextMenuBaseTheme,
     ViewPlugin.define(
       () => {
         return {
@@ -172,8 +209,11 @@ export function contextMenuExtension(userId: string): any[] {
             view.dispatch({
               effects: [
                 showContextMenu.of({
-                  top: event.clientY + 2,
-                  left: event.clientX + 2,
+                  position: {
+                    top: event.clientY + 2,
+                    left: event.clientX + 2,
+                  },
+                  type: "ctx",
                 }),
                 setSelection.of(view.state.selection.main),
               ],
@@ -182,20 +222,44 @@ export function contextMenuExtension(userId: string): any[] {
           click: (event: MouseEvent, view: EditorView) => {
             const target = event.target as HTMLElement;
             if (target.id === "cm-context-menu-comment") {
+              event.stopPropagation();
+              view.dispatch({
+                effects: [
+                  showContextMenu.of({
+                    position: {
+                      top: event.clientY + 2,
+                      left: event.clientX + 2,
+                    },
+                    type: "comment",
+                  }),
+                ],
+              });
+            } else if (target.id === "cm-context-menu-comment-submit-button") {
               const s = view.state.field(selection);
               view.dispatch({
                 effects: addComment.of({
                   id: crypto.randomUUID(),
                   from: s?.from ?? 0,
                   to: s?.to ?? 0,
-                  content: "Lorem ipsum",
+                  content:
+                    (
+                      document.getElementById(
+                        "cm-context-menu-comment-input-field"
+                      ) as HTMLInputElement
+                    )?.value ?? "Empty comment",
                   createdBy: userId,
                 }),
               });
+              view.dispatch({
+                effects: hideContextMenu.of(true),
+              });
+            } else if (target.closest("#cm-context-menu")) {
+              // Do nothing if click is inside context menu
+            } else {
+              view.dispatch({
+                effects: hideContextMenu.of(true),
+              });
             }
-            view.dispatch({
-              effects: hideContextMenu.of(true),
-            });
           },
         },
       }
