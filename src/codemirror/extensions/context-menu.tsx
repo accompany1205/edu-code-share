@@ -63,18 +63,6 @@ class ContextMenuWidget extends WidgetType {
     dom.className = "cm-context-menu";
     const root = createRoot(dom);
     root.render(
-      /* <Menu
-        id="cm-context-menu"
-        open={this.position !== undefined}
-        anchorReference="anchorPosition"
-        anchorPosition={
-          this.position !== undefined
-            ? { top: this.position.top, left: this.position.left }
-            : undefined
-        }
-      >
-        <MenuItem id="cm-context-menu-comment">Create comment</MenuItem>
-      </Menu> */
       <Popper
         id="cm-context-menu"
         open={this.position !== undefined}
@@ -124,7 +112,7 @@ class ContextMenuWidget extends WidgetType {
                     label="Comment"
                     variant="outlined"
                     inputProps={{ id: "cm-context-menu-comment-input-field" }}
-                    defaultValue="Lorem ipsum"
+                    autoFocus
                   />
                   <Button id="cm-context-menu-comment-submit-button">
                     Submit
@@ -139,8 +127,8 @@ class ContextMenuWidget extends WidgetType {
     return dom;
   }
 
-  ignoreEvent(): boolean {
-    return false;
+  ignoreEvent(event: Event): boolean {
+    return event.type !== "click";
   }
 }
 
