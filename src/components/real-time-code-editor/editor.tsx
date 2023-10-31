@@ -13,12 +13,15 @@ import { Socket } from "socket.io-client";
 
 import { voidFunction } from "@utils";
 
-import { State } from "../../sections/teacher-panel/code-panel/work-space/blocks/code-editor-block";
 import { peerExtension } from "../../codemirror/extensions/collab";
+import { commentsExtension } from "../../codemirror/extensions/comments";
+import { contextMenuExtension } from "../../codemirror/extensions/context-menu";
 import { cursorExtension } from "../../codemirror/extensions/cursors";
+import { State } from "../../sections/teacher-panel/code-panel/work-space/blocks/code-editor-block";
 
 interface IEditor {
   roomId: string;
+  userId: string;
   state: State;
   cursorId: string;
   cursorText: string;
@@ -28,6 +31,7 @@ interface IEditor {
 
 export const CodeEditor = ({
   roomId,
+  userId,
   state,
   cursorId,
   cursorText,
@@ -54,6 +58,8 @@ export const CodeEditor = ({
         langs.html(),
         peerExtension(socket, state.version ?? 0, cursorId, roomId),
         cursorExtension(cursorText),
+        commentsExtension(userId),
+        contextMenuExtension(userId),
       ],
     });
 

@@ -9,7 +9,8 @@ import { ChangeSet, Extension, StateEffect, Text } from "@codemirror/state";
 import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import { Socket } from "socket.io-client";
 
-import { addCursor, removeCursor } from "./cursors";
+import { AddComment, addComment, removeComment } from "./comments";
+import { AddCursor, addCursor, removeCursor } from "./cursors";
 
 async function pushUpdates(
   socket: Socket,
@@ -17,7 +18,7 @@ async function pushUpdates(
   version: number,
   fullUpdates: readonly Update[],
   timeout = 3000
-): Promise<{ status: boolean, updates: Update[] }> {
+): Promise<{ status: boolean; updates: Update[] }> {
   // Strip off transaction data
   const updates = fullUpdates.map((u) => ({
     clientID: u.clientID,
@@ -26,11 +27,25 @@ async function pushUpdates(
   }));
 
   return await new Promise(function (resolve, reject) {
-    socket.timeout(timeout).emit("pushUpdates", roomId, version, JSON.stringify(updates), (err: unknown, status: boolean | unknown, updates: Update[]) => {
-      if (err) { reject(err); return; }
-      if (typeof status !== "boolean") { reject(new Error("No permission to access this document")); return; }
-      resolve({ status, updates });
-    });
+    socket
+      .timeout(timeout)
+      .emit(
+        "pushUpdates",
+        roomId,
+        version,
+        JSON.stringify(updates),
+        (err: unknown, status: boolean | unknown, updates: Update[]) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          if (typeof status !== "boolean") {
+            reject(new Error("No permission to access this document"));
+            return;
+          }
+          resolve({ status, updates });
+        }
+      );
   });
 }
 
@@ -41,32 +56,56 @@ async function pullUpdates(
   timeout = 3000
 ): Promise<readonly Update[]> {
   return await new Promise(function (resolve, reject) {
-    socket.timeout(timeout).emit("pullUpdates", roomId, version, (err: unknown, updates: string) => {
-      if (err) { reject(err); return; }
-      try {
-        resolve(JSON.parse(updates));
-      } catch (e) {
-        reject(new Error("No permission to access this document"));
-      }
-    });
+    socket
+      .timeout(timeout)
+      .emit("pullUpdates", roomId, version, (err: unknown, updates: string) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        try {
+          resolve(JSON.parse(updates));
+        } catch (e) {
+          reject(new Error("No permission to access this document"));
+        }
+      });
   }).then((updates: any) =>
     updates.map((u: any) => {
       if (u.effects?.[0]) {
         const effects: Array<StateEffect<any>> = [];
 
         u.effects.forEach((effect: StateEffect<any>) => {
-          if (effect.value?.id && effect.value?.from !== undefined) {
-            const cursor = {
+          if (effect.value?.type === "add-cursor") {
+            const cursor: AddCursor = {
+              type: "add-cursor",
               id: effect.value.id,
               from: effect.value.from,
               to: effect.value.to,
             };
 
             effects.push(addCursor.of(cursor));
-          } else if (effect.value?.id) {
+          } else if (effect.value?.type === "remove-cursor") {
             // We don't want to remove the cursor on disconnect
             // const cursorId = effect.value.id;
             // effects.push(removeCursor.of(cursorId));
+          } else if (effect.value?.type === "add-comment") {
+            const comment: AddComment = {
+              type: "add-comment",
+              id: effect.value.id,
+              from: effect.value.from,
+              to: effect.value.to,
+              content: effect.value.content,
+              createdBy: effect.value.createdBy,
+            };
+
+            effects.push(addComment.of(comment));
+          } else if (effect.value?.type === "remove-comment") {
+            effects.push(
+              removeComment.of({
+                type: "remove-comment",
+                id: effect.value.id,
+              })
+            );
           }
         });
 
@@ -91,18 +130,26 @@ export async function getDocument(
   timeout = 3000
 ): Promise<{ version: number; doc: Text }> {
   return await new Promise(function (resolve, reject) {
-    socket.timeout(timeout).emit("getDocument", roomId, (error: unknown, version: number | unknown, doc: string) => {
-      if (error) {
-        reject(error); return;
-      }
-      if (typeof version !== "number") {
-        reject(new Error("No permission to access this document")); return;
-      }
-      resolve({
-        version,
-        doc: Text.of(doc?.length ? doc.split("\n") : [""]),
-      });
-    });
+    socket
+      .timeout(timeout)
+      .emit(
+        "getDocument",
+        roomId,
+        (error: unknown, version: number | unknown, doc: string) => {
+          if (error) {
+            reject(error);
+            return;
+          }
+          if (typeof version !== "number") {
+            reject(new Error("No permission to access this document"));
+            return;
+          }
+          resolve({
+            version,
+            doc: Text.of(doc?.length ? doc.split("\n") : [""]),
+          });
+        }
+      );
   });
 }
 
@@ -110,14 +157,19 @@ export const peerExtension = (
   socket: Socket,
   startVersion: number,
   id: string,
-  roomId: string,
+  roomId: string
 ): Extension[] => {
   const collabPlugin = collab({
     startVersion,
     clientID: id,
     sharedEffects: (tr) => {
       const effects = tr.effects.filter((e) => {
-        return e.is(addCursor) || e.is(removeCursor);
+        return (
+          e.is(addCursor) ||
+          e.is(removeCursor) ||
+          e.is(addComment) ||
+          e.is(removeComment)
+        );
       });
 
       return effects;
@@ -157,7 +209,12 @@ export const peerExtension = (
         this.pushing = true;
         const version = getSyncedVersion(this.view.state);
         try {
-          const { updates: pushedUpdates } = await pushUpdates(socket, roomId, version, updates);
+          const { updates: pushedUpdates } = await pushUpdates(
+            socket,
+            roomId,
+            version,
+            updates
+          );
 
           this.view.dispatch(receiveUpdates(this.view.state, pushedUpdates));
 
@@ -196,8 +253,5 @@ export const peerExtension = (
     }
   );
 
-  return [
-    collabPlugin,
-    plugin,
-  ];
+  return [collabPlugin, plugin];
 };
