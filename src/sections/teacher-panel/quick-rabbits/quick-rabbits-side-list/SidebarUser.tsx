@@ -17,12 +17,9 @@ import {
 } from "@sections/teacher-panel/atoms/useFirebaseChat.hook";
 import LoaderDelay from "@sections/teacher-panel/LoaderDelay";
 import { isNull } from "lodash";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { createRabit } from "src/redux/slices/rabits";
-import { ActivityStatus } from "../../../../types/activity-status";
-import { getActivityColor } from "../../../../utils/activity-color";
-import { useSocket } from "@hooks";
 
 const AvatarSkeleton = (): React.ReactElement => {
   return (
@@ -38,13 +35,11 @@ const AvatarSkeleton = (): React.ReactElement => {
 };
 
 interface Props {
-  status?: ActivityStatus;
   student: Record<string, any>;
   isLoading: boolean;
 }
 
 export const SidebarUser = ({
-  status,
   student,
   isLoading,
 }: Props): React.ReactElement => {
@@ -62,10 +57,6 @@ export const SidebarUser = ({
     avatar,
   } = student.account || {};
 
-  const activityColor = useMemo(() => {
-    return getActivityColor(status);
-  }, [status]);
-
   useEffect(() => {
     getMessages(
       senderId,
@@ -78,10 +69,9 @@ export const SidebarUser = ({
     );
   }, []);
 
-  const socket = useSocket();
-
   const onConnectStudent = (): void => {
-    socket.emit("joinRoom", student.id);
+    // This is working, but not very pretty. We should unify all socket connections in a context, so we can access the socket here easily
+    io(process.env.NEXT_PUBLIC_CODE_STREAM_API ?? "", { path: "/" }).open().emit("joinRoom", student.id);
     dispatch(createRabit({ id: student.id, email, avatar }));
   };
 
@@ -97,7 +87,7 @@ export const SidebarUser = ({
         overlap="circular"
         anchorOrigin={{ vertical: "top", horizontal: "left" }}
         variant="dot"
-        sx={{ "& .MuiBadge-badge": { bgcolor: activityColor } }}
+        sx={{ backdrop: active ? "#36B37E" : "transparent" }}
       >
         <LoaderDelay
           skeleton={<AvatarSkeleton />}

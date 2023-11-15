@@ -9,15 +9,12 @@ import { Socket } from "socket.io-client";
 import { dracula } from "thememirror";
 
 import { State } from ".";
-import { peerExtension } from "../../codemirror/extensions/collab";
-import { commentsExtension } from "../../codemirror/extensions/comments";
-import { contextMenuExtension } from "../../codemirror/extensions/context-menu";
-import { cursorExtension } from "../../codemirror/extensions/cursors";
 import { initListeners, removeListeners } from "./listeners";
+import { peerExtension } from "../../codemirror/extensions/collab";
+import { cursorExtension } from "../../codemirror/extensions/cursors";
 
 interface IEditor {
   roomId?: string;
-  userId?: string;
   state?: State;
   cursorId?: string;
   cursorText?: string;
@@ -29,7 +26,6 @@ interface IEditor {
 
 export const CodeEditor = ({
   roomId,
-  userId,
   preloadedCode,
   state,
   cursorId,
@@ -71,14 +67,12 @@ export const CodeEditor = ({
         }),
         lineWrap.of(EditorView.lineWrapping),
         langs.html(),
-        ...(socket && state && cursorId && roomId && userId
-          ? [
-              peerExtension(socket, state.version ?? 0, cursorId, roomId),
-              cursorExtension(cursorText ?? cursorId),
-              commentsExtension(userId),
-              contextMenuExtension(userId),
-            ]
-          : []),
+        ...(socket && state && cursorId && roomId
+        ? [
+          peerExtension(socket, state.version ?? 0, cursorId, roomId),
+          cursorExtension(cursorText ?? cursorId)
+        ]
+        : [])
       ],
     });
 

@@ -6,6 +6,7 @@ import { useAtom } from "jotai";
 import { CircularProgress, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 
+import { useRealTimeConnection } from "src/hooks/useRealTimeConnection";
 import { useGetLessonContentQuery } from "src/redux/services/manager/lesson-content-manager";
 
 import { globalCodePanelAtom } from "./atoms/global-code-panel.atom";
@@ -17,6 +18,9 @@ export const CodePanel = (): React.ReactElement => {
   const { query } = useRouter();
   const [loading, setLoading] = useState(false);
   const [, setGlobal] = useAtom(globalCodePanelAtom);
+  const { data: realTimeData } = useRealTimeConnection(
+    query?.id as string
+  );
   const [{ activeTab }, setTab] = useAtom(mobileTabManager);
   const [{ lessonId }] = useAtom(globalCodePanelAtom);
   const { data, isFetching } = useGetLessonContentQuery(
@@ -29,10 +33,10 @@ export const CodePanel = (): React.ReactElement => {
   useEffect(() => {
     setGlobal((prev) => ({
       ...prev,
-      lessonId: "",
-      slideIndex: 0,
+      lessonId: realTimeData?.lessonId ?? "",
+      slideIndex: realTimeData?.slideIndex ?? 0,
     }));
-  }, []);
+  }, [realTimeData]);
 
   useEffect(() => {
     setLoading(true);

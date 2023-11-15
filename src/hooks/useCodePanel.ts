@@ -12,6 +12,7 @@ import { useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
 // local files
+import { useOnlineConnection, useRealTimeConnection } from "@hooks";
 import { STUDENT_PATH_DASHBOARD } from "@routes/student.paths";
 import { isValidLastVisitedData } from "@sections/code-editor-panel/helpers";
 import { getNextLessonId } from "@sections/code-editor-panel/utils/navigation";
@@ -65,9 +66,13 @@ export const useCodePanel = (): UseCodePanelReturn => {
   const searchParams = useSearchParams();
 
   const [confetti, setConfetti] = useState(false);
-  const [code, setCode] = useState<string>("");
+  const [code, setCode] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return window.localStorage.getItem(`code-${query.id}`) ?? "";
+    }
+    return "";
+  });
 
-  const [isLoadingComplete, setIsLoadingComplete] = useState(false);
   const [lastVisitedData, setLastVisitedData] = useState<LastVisitedState>({
     unitId: null,
     lessonId: null,
@@ -77,8 +82,12 @@ export const useCodePanel = (): UseCodePanelReturn => {
 
   const onChangeCode = useCallback((code: string) => {
     setCode(code);
-    window.localStorage.setItem(`code-${query.id}-${query.lessonId}`, code);
-  }, []);
+    window.localStorage.setItem(`code-${query.id}`, code);
+  }, [query.id]);
+
+  // ONLY LOGINED USER CAN USE
+  useOnlineConnection(user?.id);
+  useRealTimeConnection(user?.id);
 
   const [completeLesson] = useCompleteLessonMutation();
   const [updateLastVisitedDataTrigger] =
@@ -88,13 +97,17 @@ export const useCodePanel = (): UseCodePanelReturn => {
     { id: query.lessonId as string },
     { skip: !query.lessonId }
   );
-  const { data: courseContent, isLoading: isLoadingCourseContent } =
-    useGetChallangesQuery({ id: query.id as string }, { skip: !query.id });
+
+  const {
+    data: courseContent,
+    isLoading: isLoadingCourseContent
+  } = useGetChallangesQuery(
+    { id: query.id as string },
+    { skip: !query.id }
+  );
 
   const { data: lesson, isLoading: isLoadingLesson } = useGetLessonStudentQuery(
-    {
-      id: query.lessonId as string,
-    },
+    { id: query.lessonId as string },
     { skip: !query.lessonId }
   );
 
@@ -199,16 +212,11 @@ export const useCodePanel = (): UseCodePanelReturn => {
   };
 
   useEffect(() => {
-    if (!query.id) {
-      push(STUDENT_PATH_DASHBOARD.page404);
+    if (query.id) {
+      const savedCode = window?.localStorage.getItem(`code-${query.id}`)
+      setCode(savedCode ?? "")
     }
-  }, []);
-
-  useEffect(() => {
-    if (!isLoading && !isLoadingCourseContent && !isLoadingLesson) {
-      setIsLoadingComplete(true);
-    }
-  }, [isLoading, isLoadingCourseContent, isLoadingLesson]);
+  }, [query.id]);
 
   useEffect(() => {
     setLastVisitedData({
@@ -222,6 +230,11 @@ export const useCodePanel = (): UseCodePanelReturn => {
       updateLastVisitedData();
     };
   }, [lastVisitedData]);
+
+  const isLoadingComplete = !isLoading &&
+    !isLoadingCourseContent &&
+    !isLoadingLesson &&
+    query.id != null;
 
   return {
     isLoadingComplete,
