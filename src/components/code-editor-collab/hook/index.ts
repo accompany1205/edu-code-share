@@ -7,8 +7,8 @@ import {
   useState,
 } from "react";
 
+import { Compartment, Extension } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
-import { Compartment, type Extension } from "@uiw/react-codemirror";
 import { Socket } from "socket.io-client";
 
 import { EditorMode } from "./constants";

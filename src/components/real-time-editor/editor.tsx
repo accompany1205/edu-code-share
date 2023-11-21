@@ -10,13 +10,8 @@ import { dracula } from "thememirror";
 
 import { peerExtension } from "../../codemirror/extensions/collab";
 import { cursorExtension } from "../../codemirror/extensions/cursors";
+import { State } from "./index";
 import { initListeners, removeListeners } from "./listeners";
-
-interface State {
-  connected: boolean;
-  version?: number;
-  doc?: string;
-}
 
 interface IEditor {
   roomId?: string;

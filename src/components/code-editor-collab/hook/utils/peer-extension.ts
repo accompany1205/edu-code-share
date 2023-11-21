@@ -14,7 +14,7 @@ import { EmitSocketEvents, SubscribedEvents } from "./socket";
 
 const pushUpdates = async (
   socket: Socket,
-  docName: string,
+  roomId: string,
   version: number,
   fullUpdates: readonly Update[],
   fileName: string
@@ -27,13 +27,15 @@ const pushUpdates = async (
   }));
 
   return await new Promise(function (resolve) {
-    socket.emit(
-      EmitSocketEvents.Push,
-      docName,
+    socket.emit(EmitSocketEvents.Push, {
+      roomId,
       version,
-      JSON.stringify(updates),
-      fileName
-    );
+      updates: JSON.stringify(updates),
+      fileName: {
+        id: fileName,
+        name: fileName,
+      },
+    });
 
     socket.once(SubscribedEvents.PushResponse, function (status: boolean) {
       resolve(status);
@@ -48,12 +50,20 @@ const pullUpdates = async (
   fileName: string
 ): Promise<readonly Update[]> => {
   return await new Promise(function (resolve) {
-    socket.emit(EmitSocketEvents.Pull, roomId, version, fileName, socket.id);
+    socket.emit(EmitSocketEvents.Pull, {
+      roomId,
+      version,
+      fileName: {
+        id: fileName,
+        name: fileName,
+      },
+      socketId: socket.id,
+    });
 
     socket.once(
       `${EmitSocketEvents.PullResponse}${roomId}${fileName}`,
       function (updates) {
-        resolve(JSON.parse(updates));
+        resolve(updates);
       }
     );
   }).then((updates: any) =>
@@ -144,22 +154,30 @@ export const getDocument = async ({
   preloadedCode,
 }: GetDocumentProps): Promise<GetDocumentReturn> => {
   return await new Promise(function (resolve) {
-    socket.emit(
-      EmitSocketEvents.GetDoc,
+    socket.emit(EmitSocketEvents.GetDoc, {
       roomId,
       cursorName,
-      fileName,
-      preloadedCode
-    );
+      fileName: {
+        id: fileName,
+        name: fileName,
+      },
+      defaultFileName: fileName,
+      preloadedCode,
+    });
 
     socket.once(
       SubscribedEvents.GetDocResponse,
-      function (
-        version: number,
-        doc: string,
-        cursorName: string,
-        updates: any
-      ) {
+      function ({
+        version,
+        doc,
+        cursorName,
+        updates,
+      }: {
+        version: number;
+        doc: string;
+        cursorName: string;
+        updates: any;
+      }) {
         resolve({
           version,
           doc: Text.of(doc.split("\n")),
