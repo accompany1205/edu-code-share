@@ -33,7 +33,6 @@ export * from "./menu-popover";
 export * from "./modal-code-fullscreen";
 // export * from "./organizational-chart";
 export * from "./progress-bar";
-export * from "./real-time-editor";
 export * from "./resizer";
 export * from "./scrollbar";
 export * from "./search-not-found";
