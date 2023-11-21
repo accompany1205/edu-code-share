@@ -1,47 +1,43 @@
 import {
   type RefObject,
-  useEffect,
-  useState,
-  useRef,
   useCallback,
-  useMemo
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
-import { type Extension, Compartment } from '@uiw/react-codemirror';
-import { Socket } from "socket.io-client";
-import { EditorView } from "@codemirror/view";
 
-import { getDocument, getFileInfo } from "./utils/peer-extension";
-import { getExtensions } from "./utils/extensions";
-import {
-  unsubscribeSocket,
-  EmitSocketEvents,
-  SubscribedEvents
-} from "./utils/socket"
-import {
-  type MemoizedProps,
-  useMemoizedProps
-} from "./useMemoizedProps";
+import { EditorView } from "@codemirror/view";
+import { Compartment, type Extension } from "@uiw/react-codemirror";
+import { Socket } from "socket.io-client";
+
 import { EditorMode } from "./constants";
+import { type MemoizedProps, useMemoizedProps } from "./useMemoizedProps";
+import { getExtensions } from "./utils/extensions";
+import { getDocument, getFileInfo } from "./utils/peer-extension";
+import { EmitSocketEvents, SubscribedEvents } from "./utils/socket";
 
 export interface UseCodeEditorCollabProps extends MemoizedProps {
-  roomId: string
-  mode?: EditorMode
-  activeFile: string
-  socket: Socket
+  userId: string;
+  roomId: string;
+  mode?: EditorMode;
+  activeFile: string;
+  socket: Socket;
 }
 
 interface UseCodeEditorCollabReturn {
-  extensions?: Extension[]
-  editorRef: RefObject<HTMLDivElement>
-  isLoading: boolean
-  activeFile: string
-  key: number
-  doc: string
-  onCreateEditor: (view: EditorView) => void
+  extensions?: Extension[];
+  editorRef: RefObject<HTMLDivElement>;
+  isLoading: boolean;
+  activeFile: string;
+  key: number;
+  doc: string;
+  onCreateEditor: (view: EditorView) => void;
 }
 
 export const useCodeEditorCollab = ({
-	roomId,
+  userId,
+  roomId,
   mode = EditorMode.Owner,
   activeFile,
   socket,
@@ -49,23 +45,22 @@ export const useCodeEditorCollab = ({
 }: UseCodeEditorCollabProps): UseCodeEditorCollabReturn => {
   const modeRef = useRef(mode);
   const firstInit = useRef(true);
-  const socketRef = useRef<Socket>(socket);
   const initRoomDataRef = useRef({ mode, roomId });
   const editorView = useRef<EditorView | null>(null);
   const editorRef = useRef<HTMLDivElement | null>(null);
-	const lineWrapRef = useRef<Compartment | null>(null);
+  const lineWrapRef = useRef<Compartment | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [key, setKey] = useState(0);
   const [extensions, setExtensions] = useState<Extension[] | undefined>();
-  const [doc, setDoc] = useState('');
+  const [doc, setDoc] = useState("");
 
   const {
     cursorText,
     withTooltip,
     onChange,
     setActiveFile,
-    onResetFileManager
+    onResetFileManager,
   } = useMemoizedProps(propsToMemoize);
 
   // ------------------------------------------------------ //
@@ -73,15 +68,14 @@ export const useCodeEditorCollab = ({
   // ------------------------------------------------------ //
 
   const onCreateEditor = (view: EditorView) => {
-    editorView.current = view
-  }
+    editorView.current = view;
+  };
 
   const clearSocketData = useCallback(() => {
     if (initRoomDataRef.current.mode === EditorMode.Owner) {
-      socketRef.current?.emit(EmitSocketEvents.DeleteRoom, initRoomDataRef.current.roomId);
+      socket.emit(EmitSocketEvents.DeleteRoom, initRoomDataRef.current.roomId);
     }
 
-    unsubscribeSocket(socketRef.current);
     editorView.current?.destroy();
   }, []);
 
@@ -89,73 +83,84 @@ export const useCodeEditorCollab = ({
   //                     Initialize Base                    //
   // ------------------------------------------------------ //
 
-  const baseInit = useCallback(async (fileName: string) => {
-    lineWrapRef.current = new Compartment();
+  const baseInit = useCallback(
+    async (fileName: string) => {
+      lineWrapRef.current = new Compartment();
 
-    const { version, doc, cursorName } = await getDocument({
-      roomId,
-      fileName,
-      socket: socketRef.current,
-      cursorName: cursorText,
-    });
+      const { version, doc, cursorName } = await getDocument({
+        roomId,
+        fileName,
+        socket,
+        cursorName: cursorText,
+      });
 
-    const extensions = getExtensions({
-      socket: socketRef.current,
-      lineWrap: lineWrapRef.current,
-      tooltipText: cursorText,
-      cursorId: cursorName,
-      withTooltip,
-      fileName,
-      onChange,
-      version,
-      roomId,
-    });
+      const extensions = getExtensions({
+        socket,
+        lineWrap: lineWrapRef.current,
+        tooltipText: cursorText,
+        cursorId: cursorName,
+        withTooltip,
+        fileName,
+        onChange,
+        version,
+        roomId,
+      });
 
-    setExtensions(extensions);
-    setDoc(doc.toString());
-    setKey((prev) => ++prev);
-    setIsLoading(false);
-  }, [roomId, cursorText, onChange, withTooltip]);
+      setExtensions(extensions);
+      setDoc(doc.toString());
+      setKey((prev) => ++prev);
+      setIsLoading(false);
+    },
+    [roomId, cursorText, onChange, withTooltip]
+  );
 
   // ------------------------------------------------------ //
   //                   Initialize SubOwner                  //
   // ------------------------------------------------------ //
 
-  const runInitSubOwner = useCallback(async (isFirstInit: boolean) => {
-    firstInit.current = false;
+  const runInitSubOwner = useCallback(
+    async (isFirstInit: boolean) => {
+      firstInit.current = false;
 
-    if (!isFirstInit) {
-      return await baseInit(activeFile);
-    }
+      if (!isFirstInit) {
+        await baseInit(activeFile);
+        return;
+      }
 
-    const fileInfo = await getFileInfo(roomId, socketRef.current);
+      const fileInfo = await getFileInfo(roomId, socket);
 
-    onResetFileManager(fileInfo);
+      onResetFileManager(fileInfo);
 
-    if (fileInfo.activeFile === activeFile) {
-      await runInitSubOwner(false);
-    }
-  }, [activeFile, baseInit, onResetFileManager]);
+      if (fileInfo.activeFile === activeFile) {
+        await runInitSubOwner(false);
+      }
+    },
+    [activeFile, baseInit, onResetFileManager]
+  );
 
   // ------------------------------------------------------ //
   //                   Initialize Owner                     //
   // ------------------------------------------------------ //
 
-  const runInitOwner = useCallback(async (isFirstInit: boolean) => {
-    firstInit.current = false;
+  const runInitOwner = useCallback(
+    async (isFirstInit: boolean) => {
+      firstInit.current = false;
 
-    const fileInfo = await getFileInfo(roomId, socketRef.current);
+      const fileInfo = await getFileInfo(roomId, socket);
 
-    if (!isFirstInit || fileInfo == null) {
-      return await baseInit(activeFile)
-    }
+      if (!isFirstInit || fileInfo == null) {
+        await baseInit(activeFile);
+        return;
+      }
 
-    onResetFileManager(fileInfo);
+      onResetFileManager(fileInfo);
 
-    if (fileInfo.activeFile === activeFile) {
-      await runInitOwner(false)
-    }
-  }, [activeFile, baseInit, onResetFileManager]);
+      if (fileInfo.activeFile === activeFile) {
+        await runInitOwner(false);
+      }
+    },
+    [activeFile, baseInit, onResetFileManager]
+  );
 
   // ------------------------------------------------------ //
   //                   Initialize Watcher                   //
@@ -165,11 +170,11 @@ export const useCodeEditorCollab = ({
     firstInit.current = false;
 
     let _activeFile = activeFile;
-    const fileInfo = await getFileInfo(roomId, socketRef.current);
+    const fileInfo = await getFileInfo(roomId, socket);
 
     if (fileInfo != null) {
-      const shouldChangeFile = fileInfo.activeFile != null &&
-        fileInfo.activeFile !== activeFile;
+      const shouldChangeFile =
+        fileInfo.activeFile != null && fileInfo.activeFile !== activeFile;
 
       if (shouldChangeFile) {
         setActiveFile(fileInfo.activeFile);
@@ -178,24 +183,27 @@ export const useCodeEditorCollab = ({
 
       _activeFile = fileInfo.activeFile ?? activeFile;
 
-      socketRef.current.on(
+      socket.on(
         SubscribedEvents.ActiveFileChanged,
         (_roomId: string, fileName: string) => {
           if (_roomId === roomId) {
             setActiveFile(fileName);
           }
         }
-      )
+      );
     }
 
     await baseInit(_activeFile);
   }, [activeFile, baseInit, setActiveFile]);
 
-  const initialize = useMemo(() => ({
-    [EditorMode.Owner]: runInitOwner,
-    [EditorMode.SubOwner]: runInitSubOwner,
-    [EditorMode.Watcher]: runInitWatcher,
-  }), [runInitWatcher, runInitOwner, runInitSubOwner]);
+  const initialize = useMemo(
+    () => ({
+      [EditorMode.Owner]: runInitOwner,
+      [EditorMode.SubOwner]: runInitSubOwner,
+      [EditorMode.Watcher]: runInitWatcher,
+    }),
+    [runInitWatcher, runInitOwner, runInitSubOwner]
+  );
 
   // ------------------------------------------------------ //
   //                       Effects                          //
@@ -211,10 +219,12 @@ export const useCodeEditorCollab = ({
     initialize[modeRef.current](firstInit.current);
   }, [initialize]);
 
-	useEffect(() => {
-    window.addEventListener('beforeunload', clearSocketData);
-		return () => clearSocketData();
-	}, [clearSocketData]);
+  useEffect(() => {
+    window.addEventListener("beforeunload", clearSocketData);
+    return () => {
+      clearSocketData();
+    };
+  }, [clearSocketData]);
 
   return {
     editorRef,
@@ -223,6 +233,6 @@ export const useCodeEditorCollab = ({
     doc,
     key,
     isLoading,
-    onCreateEditor
-  }
-}
+    onCreateEditor,
+  };
+};

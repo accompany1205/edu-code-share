@@ -1,120 +1,111 @@
-import { type FC, memo, useRef } from "react";
+import { type FC, memo } from "react";
 
-import CodeMirror from '@uiw/react-codemirror';
+import CodeMirror from "@uiw/react-codemirror";
 
-import LoadingCodeEditor from "./components/loading-code-editor"
+import { useSocket } from "@hooks";
 
-import {
-	type UseCodeEditorCollabProps,
-	useCodeEditorCollab,
-} from "./hook";
-import { EditorMode } from "./hook/constants";
-import { useStyles } from "./styles";
-import { useFileManager } from "./hook/useFileManager";
 import FileModal from "./components/file-modal";
 import FileSwitcher from "./components/file-switcher";
-import { createSocket } from "./hook/utils/socket";
+import LoadingCodeEditor from "./components/loading-code-editor";
+import { type UseCodeEditorCollabProps, useCodeEditorCollab } from "./hook";
+import { EditorMode } from "./hook/constants";
+import { useFileManager } from "./hook/useFileManager";
+import { useStyles } from "./styles";
 
-interface CodeEditorCollabProps extends Omit<UseCodeEditorCollabProps,
-	'activeFile' |
-	'onDeleteFile' |
-	'setActiveFile' |
-	'onResetFileManager' |
-	'socket' |
-	'setLocalActiveFile'
-	> {
-	className?: string
-	isReadOnly?: boolean
-	withFileManager?: boolean
+interface CodeEditorCollabProps
+  extends Omit<
+    UseCodeEditorCollabProps,
+    | "activeFile"
+    | "onDeleteFile"
+    | "setActiveFile"
+    | "onResetFileManager"
+    | "socket"
+    | "setLocalActiveFile"
+  > {
+  className?: string;
+  isReadOnly?: boolean;
+  withFileManager?: boolean;
 }
 
 const CodeEditorCollab: FC<CodeEditorCollabProps> = ({
-	className,
-	isReadOnly = false,
-	mode = EditorMode.Owner,
-	withFileManager = true,
-	roomId,
-	...otherProps
+  className,
+  isReadOnly = false,
+  mode = EditorMode.Owner,
+  withFileManager = true,
+  roomId,
+  ...otherProps
 }) => {
-	const styles = useStyles();
-	const socketRef = useRef(createSocket());
+  const styles = useStyles();
 
-	const {
-		activeFile,
-		isFileFormOpen,
-		isOpen,
-		setIsOpen,
-		fileList,
-		setIsFileFormOpen,
-		onAddFile,
-		addedFileList,
-		onDeleteFileWithEvents,
-		onChangeFileWithEvents,
-		...collabProps
-	} = useFileManager({
-		socket: socketRef.current,
-		roomId,
-		mode
-	});
+  const socket = useSocket();
 
-	const {
-		editorRef,
-		isLoading,
-		extensions,
-		doc,
-		key,
-		onCreateEditor
-	} = useCodeEditorCollab({
-		...otherProps,
-		...collabProps,
-		activeFile,
-		mode,
-		socket: socketRef.current,
-		roomId
-	});
+  const {
+    activeFile,
+    isFileFormOpen,
+    isOpen,
+    setIsOpen,
+    fileList,
+    setIsFileFormOpen,
+    onAddFile,
+    addedFileList,
+    onDeleteFileWithEvents,
+    onChangeFileWithEvents,
+    ...collabProps
+  } = useFileManager({
+    socket,
+    roomId,
+    mode,
+  });
 
-	return (
-		<div
-			className={`${styles.wrapper} code-editor-wrapper`}
-			ref={editorRef}
-		>
-			{withFileManager && 
-				<>
-					<FileModal
-						isOpen={isOpen}
-						isFileFormOpen={isFileFormOpen}
-						setActiveFile={onChangeFileWithEvents}
-						setIsOpen={setIsOpen}
-						fileList={fileList}
-						setIsFileFormOpen={setIsFileFormOpen}
-						onAddFile={onAddFile}
-						onDeleteFile={onDeleteFileWithEvents}
-						mode={mode}
-					/>
+  const { editorRef, isLoading, extensions, doc, key, onCreateEditor } =
+    useCodeEditorCollab({
+      ...otherProps,
+      ...collabProps,
+      activeFile,
+      mode,
+      socket,
+      roomId,
+    });
 
-					<FileSwitcher
-						activeFile={activeFile}
-						onChange={onChangeFileWithEvents}
-						fileList={addedFileList}
-					/>
-				</>
-			}
+  return (
+    <div className={`${styles.wrapper} code-editor-wrapper`} ref={editorRef}>
+      {withFileManager && (
+        <>
+          <FileModal
+            isOpen={isOpen}
+            isFileFormOpen={isFileFormOpen}
+            setActiveFile={onChangeFileWithEvents}
+            setIsOpen={setIsOpen}
+            fileList={fileList}
+            setIsFileFormOpen={setIsFileFormOpen}
+            onAddFile={onAddFile}
+            onDeleteFile={onDeleteFileWithEvents}
+            mode={mode}
+          />
 
-			{isLoading && <LoadingCodeEditor />}
+          <FileSwitcher
+            activeFile={activeFile}
+            onChange={onChangeFileWithEvents}
+            fileList={addedFileList}
+          />
+        </>
+      )}
 
-			<CodeMirror
-				onCreateEditor={onCreateEditor}
-				key={key}
-				className={`flex-1 overflow-scroll text-left ${className}`}
-				height="100%"
-				basicSetup={false}
-				theme="dark"
-				extensions={extensions}
-				readOnly={isReadOnly}
-				value={doc}
-			/>
-		</div>
-	)
-}
+      {isLoading && <LoadingCodeEditor />}
+
+      <CodeMirror
+        onCreateEditor={onCreateEditor}
+        key={key}
+        className={`flex-1 overflow-scroll text-left ${className}`}
+        height="100%"
+        basicSetup={false}
+        theme="dark"
+        extensions={extensions}
+        readOnly={isReadOnly}
+        value={doc}
+      />
+    </div>
+  );
+};
 
 export default memo(CodeEditorCollab);
