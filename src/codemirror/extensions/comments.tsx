@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import { StateEffect, StateField } from "@codemirror/state";
 import {
   Decoration,
@@ -10,7 +8,6 @@ import {
   WidgetType,
 } from "@codemirror/view";
 import { createRoot } from "react-dom/client";
-import { renderToStaticMarkup } from "react-dom/server";
 import { CgChevronDown, CgChevronUp, CgClose, CgComment } from "react-icons/cg";
 
 import { Collapse, IconButton } from "@mui/material";
