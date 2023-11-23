@@ -71,14 +71,6 @@ export const useCodeEditorCollab = ({
     editorView.current = view;
   };
 
-  const clearSocketData = useCallback(() => {
-    if (initRoomDataRef.current.mode === EditorMode.Owner) {
-      socket.emit(EmitSocketEvents.DeleteRoom, initRoomDataRef.current.roomId);
-    }
-
-    editorView.current?.destroy();
-  }, []);
-
   // ------------------------------------------------------ //
   //                     Initialize Base                    //
   // ------------------------------------------------------ //
@@ -219,13 +211,6 @@ export const useCodeEditorCollab = ({
     editorView.current?.destroy();
     initialize[modeRef.current](firstInit.current);
   }, [initialize]);
-
-  useEffect(() => {
-    window.addEventListener("beforeunload", clearSocketData);
-    return () => {
-      clearSocketData();
-    };
-  }, [clearSocketData]);
 
   return {
     editorRef,

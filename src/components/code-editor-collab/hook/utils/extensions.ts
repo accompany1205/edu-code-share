@@ -69,7 +69,7 @@ export const getExtensions = ({
       startVersion: version,
       fileName,
     }),
-    cursorExtension(userId),
+    cursorExtension(cursorId),
     commentsExtension(userId),
     contextMenuExtension(userId),
   ];
