@@ -56,7 +56,6 @@ export * from "./upload";
 export * from "./module-lessons-autocomplete";
 export * from "./nav-section";
 export * from "./real-time-editor";
-export * from "./real-time-code-editor";
 export * from "./role-access/RoleAccess";
 export * from "./slider/CarouselArrowIndex";
 export * from "./slider/CarouselArrows";
