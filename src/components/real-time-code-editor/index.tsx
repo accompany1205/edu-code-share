@@ -1,10 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
 
-import { Socket } from "socket.io-client";
-
-import { CodeEditor } from "./editor";
-import { getDocument } from "../../codemirror/extensions/collab";
 import { useSocket } from "@hooks";
+
+import { getDocument } from "../../codemirror/extensions/collab";
+import { CodeEditor } from "./editor";
 
 interface State {
   connected: boolean;
@@ -18,12 +17,10 @@ interface IRealTimeCodeEditor {
   colabCursonId: string;
   colabCursonText: string;
   roomId: string;
-  userId: string;
 }
 
 export const RealTimeCodeEditor = ({
   roomId,
-  userId,
   colabCursonId,
   colabCursonText,
   connectionType = "connect",
@@ -63,8 +60,6 @@ export const RealTimeCodeEditor = ({
   }, [socket, initializeData]);
 
   useEffect(() => {
-    socket.open();
-
     void initializeConnection();
     if (socket.connected) {
       setState((prev) => ({
@@ -138,7 +133,6 @@ export const RealTimeCodeEditor = ({
         state={state}
         cursorId={colabCursonId}
         cursorText={colabCursonText}
-        userId={userId}
         socket={socket}
       />
     </>

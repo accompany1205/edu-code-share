@@ -7,6 +7,7 @@ import {
 } from "@codemirror/collab";
 import { ChangeSet, Extension, StateEffect, Text } from "@codemirror/state";
 import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
+import { error } from "console";
 import { Socket } from "socket.io-client";
 
 import { AddComment, addComment, removeComment } from "./comments";
@@ -164,12 +165,7 @@ export const peerExtension = (
     clientID: id,
     sharedEffects: (tr) => {
       const effects = tr.effects.filter((e) => {
-        return (
-          e.is(addCursor) ||
-          e.is(removeCursor) ||
-          e.is(addComment) ||
-          e.is(removeComment)
-        );
+        return e.is(addCursor) || e.is(removeCursor);
       });
 
       return effects;
@@ -215,7 +211,6 @@ export const peerExtension = (
             version,
             updates
           );
-
           this.view.dispatch(receiveUpdates(this.view.state, pushedUpdates));
 
           this.pushing = false;

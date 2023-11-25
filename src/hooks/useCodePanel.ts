@@ -1,9 +1,10 @@
-
 // node modules
-import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
+import { useCallback, useEffect, useState } from "react";
+
 import { useSnackbar } from "notistack";
+import type Confetti from "react-confetti/dist/types/Confetti";
 import { FullScreenHandle, useFullScreenHandle } from "react-full-screen";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -11,11 +12,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
+import { resetLessonEvent } from "@components";
 // local files
 import { STUDENT_PATH_DASHBOARD } from "@routes/student.paths";
+import type { BottomBarProps } from "@sections/code-editor-panel/bottom-bar";
+import { type LessonManagerProps } from "@sections/code-editor-panel/bottom-bar/lesson-manager";
 import { isValidLastVisitedData } from "@sections/code-editor-panel/helpers";
 import { getNextLessonId } from "@sections/code-editor-panel/utils/navigation";
+import type { WorkSpaceProps } from "@sections/code-editor-panel/work-space";
 import { useAuthContext } from "src/auth/useAuthContext";
+// @types
+import type { LastVisitedState } from "src/redux/interfaces/content.interface";
 import { useGetChallangesQuery } from "src/redux/services/manager/challenges-student";
 import {
   useGetLessonContentStudentQuery,
@@ -24,38 +31,34 @@ import {
 } from "src/redux/services/manager/lesson-student";
 import { useCompleteLessonMutation } from "src/redux/services/manager/progress-student";
 import {
-  setUnitId,
-  setLessonId,
   setCourseId,
+  setLessonId,
   setSlideIndex,
-} from "src/redux/slices/code-panel-global"
-import { resetLessonEvent } from "@components";
-
-// @types
-import type { LastVisitedState } from "src/redux/interfaces/content.interface";
-import type Confetti from "react-confetti/dist/types/Confetti";
-import type { WorkSpaceProps } from "@sections/code-editor-panel/work-space";
-import type { BottomBarProps } from "@sections/code-editor-panel/bottom-bar";
+  setUnitId,
+} from "src/redux/slices/code-panel-global";
 import type { RootState } from "src/redux/store";
-import { type LessonManagerProps } from "@sections/code-editor-panel/bottom-bar/lesson-manager";
 
 interface UseCodePanelReturn {
-  workSpaceProps: WorkSpaceProps
-  lessonManagerProps: LessonManagerProps
-  bottomBarProps: Omit<BottomBarProps, "lessonManagerComponent">
-  isLoadingComplete: boolean
-  handle: FullScreenHandle
-  isDesktop: boolean
-  confetti: boolean
-  onConfettiComplete: (confetti?: Confetti) => void
+  workSpaceProps: WorkSpaceProps;
+  lessonManagerProps: LessonManagerProps;
+  bottomBarProps: Omit<BottomBarProps, "lessonManagerComponent">;
+  isLoadingComplete: boolean;
+  handle: FullScreenHandle;
+  isDesktop: boolean;
+  confetti: boolean;
+  onConfettiComplete: (confetti?: Confetti) => void;
 }
 
-const LANGUAGE = "html"
+const LANGUAGE = "html";
 
 export const useCodePanel = (): UseCodePanelReturn => {
-  const dispatch = useDispatch()
-  const savedUnitId = useSelector((state: RootState) => state.codePanelGlobal.unitId)
-  const savedLessonId = useSelector((state: RootState) => state.codePanelGlobal.lessonId)
+  const dispatch = useDispatch();
+  const savedUnitId = useSelector(
+    (state: RootState) => state.codePanelGlobal.unitId
+  );
+  const savedLessonId = useSelector(
+    (state: RootState) => state.codePanelGlobal.lessonId
+  );
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up(1000));
   const { enqueueSnackbar } = useSnackbar();
@@ -67,7 +70,6 @@ export const useCodePanel = (): UseCodePanelReturn => {
   const [confetti, setConfetti] = useState(false);
   const [code, setCode] = useState<string>("");
 
-  const [isLoadingComplete, setIsLoadingComplete] = useState(false);
   const [lastVisitedData, setLastVisitedData] = useState<LastVisitedState>({
     unitId: null,
     lessonId: null,
@@ -75,10 +77,13 @@ export const useCodePanel = (): UseCodePanelReturn => {
   const unitId = searchParams.get("unitId");
   const lessonId = searchParams.get("lessonId");
 
-  const onChangeCode = useCallback((code: string) => {
-    setCode(code);
-    window.localStorage.setItem(`code-${query.id}-${query.lessonId}`, code);
-  }, []);
+  const onChangeCode = useCallback(
+    (code: string) => {
+      setCode(code);
+      window.localStorage.setItem(`code-${query.id}-${query.lessonId}`, code);
+    },
+    [query.id, query.lessonId]
+  );
 
   const [completeLesson] = useCompleteLessonMutation();
   const [updateLastVisitedDataTrigger] =
@@ -88,25 +93,24 @@ export const useCodePanel = (): UseCodePanelReturn => {
     { id: query.lessonId as string },
     { skip: !query.lessonId }
   );
+
   const { data: courseContent, isLoading: isLoadingCourseContent } =
     useGetChallangesQuery({ id: query.id as string }, { skip: !query.id });
 
   const { data: lesson, isLoading: isLoadingLesson } = useGetLessonStudentQuery(
-    {
-      id: query.lessonId as string,
-    },
+    { id: query.lessonId as string },
     { skip: !query.lessonId }
   );
 
   const onConfettiComplete = (confetti?: Confetti) => {
     setConfetti(false);
     confetti?.reset();
-  }
+  };
 
   const onOpenLesson = (lessonId: string, unitId: string): void => {
-    dispatch(setLessonId(lessonId))
-    dispatch(setUnitId(unitId))
-    dispatch(setCourseId(query.id as string))
+    dispatch(setLessonId(lessonId));
+    dispatch(setUnitId(unitId));
+    dispatch(setCourseId(query.id as string));
 
     replace(
       `${STUDENT_PATH_DASHBOARD.codePanel.workSpace(
@@ -130,15 +134,15 @@ export const useCodePanel = (): UseCodePanelReturn => {
 
     window.dispatchEvent(resetLessonEvent);
 
-    onOpenLesson(lessonId, unitId)
+    onOpenLesson(lessonId, unitId);
   };
 
   useEffect(() => {
     if (!courseContent) return;
 
     if (!savedLessonId && !savedUnitId) {
-      const nextLessonId = courseContent.units[0].lessons[0].id
-      const nextUnitId = courseContent.units[0].id
+      const nextLessonId = courseContent.units[0].lessons[0].id;
+      const nextUnitId = courseContent.units[0].id;
 
       if (!nextLessonId || !nextUnitId) {
         push(STUDENT_PATH_DASHBOARD.page404);
@@ -186,9 +190,9 @@ export const useCodePanel = (): UseCodePanelReturn => {
           undefined,
           { shallow: true }
         ).then(() => {
-          dispatch(setUnitId(pathStr[0]))
-          dispatch(setLessonId(pathStr[1]))
-          dispatch(setSlideIndex(0))
+          dispatch(setUnitId(pathStr[0]));
+          dispatch(setLessonId(pathStr[1]));
+          dispatch(setSlideIndex(0));
         });
       } else {
         enqueueSnackbar("course successfuly complete");
@@ -199,16 +203,11 @@ export const useCodePanel = (): UseCodePanelReturn => {
   };
 
   useEffect(() => {
-    if (!query.id) {
-      push(STUDENT_PATH_DASHBOARD.page404);
+    if (query.id) {
+      const savedCode = window?.localStorage.getItem(`code-${query.id}`);
+      setCode(savedCode ?? "");
     }
-  }, []);
-
-  useEffect(() => {
-    if (!isLoading && !isLoadingCourseContent && !isLoadingLesson) {
-      setIsLoadingComplete(true);
-    }
-  }, [isLoading, isLoadingCourseContent, isLoadingLesson]);
+  }, [query.id]);
 
   useEffect(() => {
     setLastVisitedData({
@@ -222,6 +221,12 @@ export const useCodePanel = (): UseCodePanelReturn => {
       updateLastVisitedData();
     };
   }, [lastVisitedData]);
+
+  const isLoadingComplete =
+    !isLoading &&
+    !isLoadingCourseContent &&
+    !isLoadingLesson &&
+    query.id != null;
 
   return {
     isLoadingComplete,
@@ -243,14 +248,14 @@ export const useCodePanel = (): UseCodePanelReturn => {
     bottomBarProps: {
       language: LANGUAGE,
       sliderSteps: data?.length ?? 0,
-      code
+      code,
     },
     lessonManagerProps: {
       onChooseLesson,
       lesson,
       linkHref: STUDENT_PATH_DASHBOARD.courses.root,
       data: courseContent,
-      isLoading: isLoadingCourseContent
-    }
-  }
-}
+      isLoading: isLoadingCourseContent,
+    },
+  };
+};
