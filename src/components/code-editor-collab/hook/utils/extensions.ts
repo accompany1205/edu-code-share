@@ -6,9 +6,11 @@ import { langs } from "@uiw/codemirror-extensions-langs";
 import { type Socket } from "socket.io-client";
 import { dracula } from "thememirror";
 
+import { commentsExtension } from "../../../../codemirror/extensions/comments";
+import { contextMenuExtension } from "../../../../codemirror/extensions/context-menu";
+import { cursorExtension } from "../../../../codemirror/extensions/cursors";
 import { getExtension } from "../../components/file-modal/utils";
 import { BASIC_SETUP, Extensions } from "../constants";
-import { cursorExtension } from "./cursors";
 import { peerExtension } from "./peer-extension";
 
 const langMap = {
@@ -34,6 +36,7 @@ interface OnInitExtensionsProps {
   socket: Socket;
   onChange?: (code: string) => void;
   roomId: string;
+  userId: string;
   cursorId: string;
   tooltipText: string;
   withTooltip: boolean;
@@ -44,6 +47,7 @@ export const getExtensions = ({
   onChange,
   socket,
   roomId,
+  userId,
   version,
   fileName,
   cursorId,
@@ -65,10 +69,8 @@ export const getExtensions = ({
       startVersion: version,
       fileName,
     }),
-    cursorExtension({
-      cursorId,
-      tooltipText,
-      withTooltip,
-    }),
+    cursorExtension(userId),
+    commentsExtension(userId),
+    contextMenuExtension(userId),
   ];
 };

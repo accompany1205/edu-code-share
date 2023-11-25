@@ -104,6 +104,7 @@ export const useCodeEditorCollab = ({
         onChange,
         version,
         roomId,
+        userId,
       });
 
       setExtensions(extensions);

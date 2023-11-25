@@ -44,8 +44,6 @@ export const useFileManager = ({
     null
   );
 
-  console.log(fileList, addedFileList);
-
   const onAddFile = (fileName: string): void => {
     socket.emit(SubscribedEvents.AddFile, socket.id, roomId, fileName);
     setFileList([...fileList, fileName]);

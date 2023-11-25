@@ -9,7 +9,17 @@ import { ChangeSet, StateEffect, Text } from "@codemirror/state";
 import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import { Socket } from "socket.io-client";
 
-import { type Cursor, addCursor } from "./cursors";
+import {
+  AddComment,
+  addComment,
+  removeComment,
+} from "../../../../codemirror/extensions/comments";
+import {
+  AddCursor,
+  Cursor,
+  addCursor,
+  removeCursor,
+} from "../../../../codemirror/extensions/cursors";
 import { EmitSocketEvents, SubscribedEvents } from "./socket";
 
 const pushUpdates = async (
@@ -69,18 +79,40 @@ const pullUpdates = async (
   }).then((updates: any) =>
     updates?.map((u: any) => {
       if (u.effects[0]) {
-        const effects: Array<StateEffect<Cursor>> = [];
+        const effects: Array<StateEffect<any>> = [];
 
-        u.effects.forEach((effect: StateEffect<Cursor>) => {
-          if (effect.value?.id) {
-            const cursor: Cursor = {
+        u.effects.forEach((effect: StateEffect<any>) => {
+          if (effect.value?.type === "add-cursor") {
+            const cursor: AddCursor = {
+              type: "add-cursor",
               id: effect.value.id,
               from: effect.value.from,
               to: effect.value.to,
-              tooltipText: effect.value.tooltipText,
             };
 
             effects.push(addCursor.of(cursor));
+          } else if (effect.value?.type === "remove-cursor") {
+            // We don't want to remove the cursor on disconnect
+            // const cursorId = effect.value.id;
+            // effects.push(removeCursor.of(cursorId));
+          } else if (effect.value?.type === "add-comment") {
+            const comment: AddComment = {
+              type: "add-comment",
+              id: effect.value.id,
+              from: effect.value.from,
+              to: effect.value.to,
+              content: effect.value.content,
+              createdBy: effect.value.createdBy,
+            };
+
+            effects.push(addComment.of(comment));
+          } else if (effect.value?.type === "remove-comment") {
+            effects.push(
+              removeComment.of({
+                type: "remove-comment",
+                id: effect.value.id,
+              })
+            );
           }
         });
 
@@ -264,7 +296,14 @@ export const peerExtension = ({
   return [
     collab({
       startVersion,
-      sharedEffects: (tr) => tr.effects.filter((e) => e.is(addCursor)),
+      sharedEffects: (tr) =>
+        tr.effects.filter(
+          (e) =>
+            e.is(addCursor) ||
+            e.is(removeCursor) ||
+            e.is(addComment) ||
+            e.is(removeComment)
+        ),
     }),
     plugin,
   ];
