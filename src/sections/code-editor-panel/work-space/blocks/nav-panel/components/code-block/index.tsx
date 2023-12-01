@@ -1,29 +1,33 @@
-import { type FC, useMemo } from "react";
-
+import { type FC, useMemo, useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { type DraggableAttributes } from "@dnd-kit/core";
 import { type SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
-import { useDispatch } from "react-redux";
 
+import { Box, Stack, Avatar, Typography } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
-import { Avatar, Box, Stack, Typography } from "@mui/material";
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 
-import { type BaseResponseInterface } from "@utils";
 import OpenCodeIcon from "src/assets/icons/OpenCodeIcon";
 import CodeEditorCollab from "src/components/code-editor-collab";
-import { EditorMode } from "src/components/code-editor-collab/hook/constants";
-import { type IFriend } from "src/redux/interfaces/friends.interface";
-import { setRoom } from "src/redux/slices/code-editor-controller";
 
+import { type BaseResponseInterface } from "@utils";
+import { type IFriend } from "src/redux/interfaces/friends.interface";
+import { EditorMode } from "src/components/code-editor-collab/hook/constants";
+import { setRoom } from "src/redux/slices/code-editor-controller";
+import { RoomStatus } from "src/components/code-editor-collab/components/status-label";
+import { createSocket, waitConnectSocket } from "src/components/code-editor-collab/hook/utils/socket";
+
+import { BOX_COLORS, HEADER_COLORS } from "./constants"
 import { getRandomIndex } from "../../hook/utils";
-import { BOX_COLORS, HEADER_COLORS } from "./constants";
-import styles from "./styles";
+
+import styles from "./styles"
 
 interface CodeBlockProps {
-  onClose: () => void;
-  attributes?: DraggableAttributes;
-  listeners?: SyntheticListenerMap;
-  data: IFriend & BaseResponseInterface;
+  onClose: () => void
+  attributes?: DraggableAttributes
+  listeners?: SyntheticListenerMap
+  data: IFriend & BaseResponseInterface
+  cursorName?: string
 }
 
 const CodeBlock: FC<CodeBlockProps> = ({
@@ -31,30 +35,50 @@ const CodeBlock: FC<CodeBlockProps> = ({
   attributes,
   listeners,
   data,
+  cursorName
 }) => {
   const dispatch = useDispatch();
-  const { boxColor, headerColor } = useMemo(
-    () => ({
-      boxColor: BOX_COLORS[getRandomIndex(BOX_COLORS.length)] ?? BOX_COLORS[0],
-      headerColor:
-        HEADER_COLORS[getRandomIndex(HEADER_COLORS.length)] ?? HEADER_COLORS[0],
-    }),
-    []
-  );
-  const boxSx = useMemo(() => styles.getBoxSx(boxColor), [boxColor]);
-  const headerSx = useMemo(
-    () => styles.getHeaderSx(headerColor),
-    [headerColor]
-  );
+  const [isConnected, setIsConnected] = useState(false);
+  const [editorStatus, setEditorStatus] = useState(RoomStatus.Inactive);
+
+  const { boxSx, headerSx, socket } = useMemo(() => {
+    const boxColor = BOX_COLORS[getRandomIndex(BOX_COLORS.length)] ?? BOX_COLORS[0];
+    const headerColor = HEADER_COLORS[getRandomIndex(HEADER_COLORS.length)] ?? HEADER_COLORS[0];
+
+    return {
+      boxSx: styles.getBoxSx(boxColor),
+      headerSx: styles.getHeaderSx(headerColor),
+      socket: createSocket()
+    };
+  }, []);
+
+  const isOpenCodeDisabled = RoomStatus.Inactive === editorStatus;
+
   const onOpenCode = () => {
-    dispatch(
-      setRoom({
-        roomId: data.id,
-        cursorText: data.first_name,
-        mode: EditorMode.SubOwner,
-      })
-    );
-  };
+    if (isOpenCodeDisabled) {
+      return;
+    }
+
+    dispatch(setRoom({
+      roomId: data.id,
+      cursorText: data.first_name,
+      mode: EditorMode.SubOwner
+    }));
+  }
+
+  useEffect(() => {
+    const runEffect = async () => {
+      const isConnected = await waitConnectSocket(socket);
+
+      if (isConnected) {
+        setIsConnected(isConnected)
+      } else {
+        void runEffect();
+      }
+    }
+
+    void runEffect()
+  }, [socket])
 
   return (
     <Box sx={boxSx}>
@@ -74,21 +98,31 @@ const CodeBlock: FC<CodeBlockProps> = ({
         </Stack>
 
         <Stack alignItems="center" direction="row" height="100%">
-          <OpenCodeIcon onClick={onOpenCode} sx={styles.OPEN_CODE_ICON} />
+          <OpenCodeIcon
+            onClick={onOpenCode}
+            sx={{
+              ...styles.OPEN_CODE_ICON,
+              ...(isOpenCodeDisabled ? styles.OPEN_CODE_DISABLED : null)
+            }}
+          />
 
           <CloseIcon sx={styles.CLOSE_ICON_SX} onClick={onClose} />
         </Stack>
       </Stack>
 
-      <CodeEditorCollab
-        roomId={data.id}
-        userId={data.id}
-        isReadOnly
-        mode={EditorMode.Watcher}
-        withFileManager={false}
-      />
+
+      {isConnected && (
+        <CodeEditorCollab
+          roomId={data.id}
+          mode={EditorMode.Watcher}
+          withFileManager={false}
+          cursorText={cursorName}
+          onRoomStatusChanged={setEditorStatus}
+          socket={socket}
+        />
+      )}
     </Box>
-  );
-};
+  )
+}
 
 export default CodeBlock;

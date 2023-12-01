@@ -5,24 +5,33 @@ import { Compartment, EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { basicSetup } from "@uiw/codemirror-extensions-basic-setup";
 import { langs } from "@uiw/codemirror-extensions-langs";
+import { Socket } from "socket.io-client";
 import { dracula } from "thememirror";
 
-import { State } from "./index";
+import { State } from ".";
 import { initListeners, removeListeners } from "./listeners";
+import { peerExtension } from "../../codemirror/extensions/collab";
+import { cursorExtension } from "../../codemirror/extensions/cursors";
 
 interface IEditor {
+  roomId?: string;
   state?: State;
+  cursorId?: string;
   cursorText?: string;
   preloadedCode: string;
   onChangeCode: (code: string) => void;
+  socket?: Socket;
   code: string;
 }
 
 export const CodeEditor = ({
+  roomId,
   preloadedCode,
   state,
+  cursorId,
   cursorText,
   onChangeCode,
+  socket,
   code,
 }: IEditor): React.ReactElement => {
   const editor = useRef();
@@ -58,6 +67,12 @@ export const CodeEditor = ({
         }),
         lineWrap.of(EditorView.lineWrapping),
         langs.html(),
+        ...(socket && state && cursorId && roomId
+        ? [
+          peerExtension(socket, state.version ?? 0, cursorId, roomId),
+          cursorExtension(cursorText ?? cursorId)
+        ]
+        : [])
       ],
     });
 

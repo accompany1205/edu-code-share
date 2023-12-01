@@ -30,20 +30,18 @@ import BaseBlock from "../base-block";
 import CodeEditorController from "../code-editor-controller";
 import Checkers from "./checkers-code-editor";
 import { CodingSymbols, CodingTools } from "./coding-controls";
-import HidedTabBtn from "./hided-tab-btn";
 import MumuSpeedDial from "./mumu-speed-deal";
 import Title from "./title";
 
 interface ICodeEditorBlock {
   user: AuthUserType | null;
   code: string;
-  onChangeCode: (code: string) => void;
+  onChangeCode: (code: Record<string, string>) => void;
   validations: Array<IValidation & BaseResponseInterface>;
   preloadedCode: string;
 }
 
 const icon = <BiCodeAlt size="20px" color="#43D4DD" />;
-const TITLE = "Code Editor";
 const TYPING_DELEY = 20000;
 const FIRST_LOADING_DELEY = 15000;
 const MOBILE_HEIGHT = 80;
@@ -116,10 +114,10 @@ const CodeEditorBlock: FC<ICodeEditorBlock> = ({
       title={<Title room={room} onResetRoom={onResetRoom} />}
       icon={icon}
       className="codeEditorTour"
+      isLeftBlock={true}
+      isLeftBtn={true}
     >
       <style>{getTitleStyles(isDesktop)}</style>
-
-      <HidedTabBtn />
 
       <MumuSpeedDial typing={typing} />
 
@@ -127,10 +125,7 @@ const CodeEditorBlock: FC<ICodeEditorBlock> = ({
         <Checkers checkers={mapValidations(code ?? "", validations)} />
       )}
 
-      <CodeEditorController
-        userId={user?.id as string}
-        onChange={onChangeCode}
-      />
+      <CodeEditorController onChange={onChangeCode} />
 
       <Box sx={{ display: isDesktop ? "none" : "block" }}>
         <Collapse in={codingSymbols} timeout={!codingSymbols ? 0 : TIMEOUT}>
@@ -155,7 +150,7 @@ const getTitleStyles = (isDesktop: boolean): string => {
   .cm-scroller::-webkit-scrollbar{
     width: 0px;
   }
-
+ 
 `;
 };
 

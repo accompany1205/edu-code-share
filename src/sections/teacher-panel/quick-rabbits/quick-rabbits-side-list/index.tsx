@@ -20,14 +20,13 @@ import MuiDrawer from "@mui/material/Drawer";
 import { CSSObject, Theme, styled } from "@mui/material/styles";
 import { Box } from "@mui/system";
 
-import { useRoomActivity } from "@hooks";
 import { onlineStudentsAtom } from "@sections/teacher-panel/atoms/online-students.atom";
-import { useGetClassStudentsQuery } from "src/redux/services/manager/classes-student";
-import { createRabit } from "src/redux/slices/rabits";
 
-import { AuthUserType } from "../../../../auth/types";
 import { SidebarUser } from "./SidebarUser";
 import { SkeletonSidebarUser } from "./SkeletonSidebarUser";
+import { createRabit } from "src/redux/slices/rabits";
+import { useGetClassStudentsQuery } from "src/redux/services/manager/classes-student";
+import { useRoomActivity } from "@hooks";
 
 const drawerWidth = 250;
 export const GROUP_CHAT_RABBIT = "Group Chat";
@@ -185,9 +184,7 @@ export const QuickRabbitsSideList = (): React.ReactElement => {
           : data?.data.map((student, i) => {
               return (
                 <SidebarUser
-                  status={getActivityStatus(
-                    (student.account as AuthUserType)?.id
-                  )}
+                  status={getActivityStatus(student.account.id)}
                   student={student}
                   key={i.toString() + student.id}
                   isLoading={isLoading}
@@ -208,14 +205,12 @@ export const QuickRabbitsSideList = (): React.ReactElement => {
           <IconButton>
             <AddIcon
               onClick={() => {
-                dispatch(
-                  createRabit({
-                    id: classId,
+                dispatch(createRabit({
+                  id: classId,
                     email: GROUP_CHAT_RABBIT,
                     avatar:
                       "https://cdn3.iconfinder.com/data/icons/communication-media-malibu-vol-1/128/group-chat-1024.png",
-                  })
-                );
+                }))
               }}
             />
           </IconButton>
