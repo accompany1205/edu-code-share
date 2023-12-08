@@ -5,7 +5,6 @@ import { LessonContentType } from "../enums/lesson-content-type.enum";
 import { ILessonContentValidation } from "./lessonContentValidation.interface";
 
 export interface IModule {
-  id: string;
   active: boolean;
   name: string;
   description: string;
@@ -22,29 +21,21 @@ export interface ILesson {
   description: string;
   tips: string[] | [];
   meta: Record<string, Record<string, any>>;
-  independent: boolean;
-  type: 'practical' | 'exercise' | 'quiz';
 }
 
 export interface ICourse {
   name: string;
-  content_id: string;
   level: string;
   price: string;
   description: string;
-  initial_enrolled: number;
-  initial_likes: number;
-  initial_stars: number;
   active: boolean;
   cover: string;
   public: boolean;
   draft: boolean;
   skills: [];
-  units: IModule[];
 }
 
 export interface ILessonContent {
-  id: string;
   body: string;
   name: string;
   type: LessonContentType;
@@ -55,7 +46,6 @@ export interface ILessonContent {
   draft: boolean;
   tags: string[];
   preload_body: string;
-  tips: string;
   solution_body: string;
   meta: Record<string, any>;
   complexity: LessonContentComplexity;
@@ -66,7 +56,6 @@ export interface ILessonContentUpdate {
   body?: string;
   type?: LessonContentType;
   slug?: string;
-  tips?: string
   title?: string;
   description?: string;
   active?: boolean;

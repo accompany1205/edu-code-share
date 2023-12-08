@@ -106,16 +106,14 @@ export default function ClassMembersAutocomplete({
         tagValue.map((option, index) => (
           <Chip
             avatar={<CustomAvatar alt={option.email} src={option.avatar} />}
-            label={option?.account?.email}
+            label={option.account.email}
             {...getTagProps({ index })}
             key={option.email}
           />
         ))
       }
       style={{ width: "100%" }}
-      renderInput={(params) => (
-        <TextField {...params} placeholder="Add students" />
-      )}
+      renderInput={(params) => <TextField {...params} placeholder="Students" />}
       renderOption={(props, recipient, { inputValue }) => {
         const { email } = recipient.account;
         const matches = match(email, inputValue);

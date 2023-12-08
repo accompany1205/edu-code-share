@@ -1,20 +1,14 @@
-import { type FC, useCallback, useEffect, useMemo, useState } from "react";
+import { type FC, useEffect, useState, useCallback, useMemo } from "react";
 
-import { Box, Button, Tooltip, Typography, useTheme } from "@mui/material";
+import { Button, Box, useTheme } from "@mui/material";
 
-import { BOX_SX, getNestedBoxSx } from "./constants";
 import NavigationElement from "./navigation-element";
 import NavigationSpeedDial from "./navigation-speed-dial";
-import {
-  TOOLTIP_CONTENT_SX,
-  getTooltipWrapperSx,
-  stylesNext,
-  stylesPrev,
-  stylesSkip,
-} from "./styles";
+import { stylesNext, stylesPrev, stylesSkip } from "./styles";
+import { BOX_SX, getNestedBoxSx } from "./constants";
 
 export enum BtnType {
-  next = "NEXT 👀",
+  next = "NEXT",
   compleated = "YOU DID IT 🙌",
   coding = "LET’S GET CODING",
 }
@@ -39,8 +33,7 @@ const Navigation: FC<INavigation> = ({
   const [btnNext, setBtnNext] = useState<BtnType>(BtnType.next);
   const nestedBox = useMemo(() => getNestedBoxSx(theme), [theme]);
   const stylePrev = useMemo(stylesPrev, []);
-  const styleNext = useMemo(() => stylesNext(btnNext), [btnNext]);
-  const tooltipWrapperSx = useMemo(() => getTooltipWrapperSx(theme), [theme]);
+  const styleNext = useMemo(() => stylesNext(btnNext), [btnNext])
 
   const getNextBtnType = useCallback((): void => {
     if (stepHasValidation) {
@@ -70,43 +63,24 @@ const Navigation: FC<INavigation> = ({
 
         <NavigationSpeedDial stepHasValidation={stepHasValidation} />
 
-        <Tooltip
-          title={
-            stepHasValidation && !canMoveNext ? (
-              <Typography sx={TOOLTIP_CONTENT_SX}>
-                Please complete all tasks to continue (or skip, if available.)
-              </Typography>
-            ) : (
-              ""
-            )
-          }
-          placement="top"
-          sx={{
-            width: 100,
-            textAlign: "center",
+        <NavigationElement
+          sx={styleNext}
+          onClick={() => {
+            onNext();
           }}
+          backType={btnNext}
         >
-          <Box sx={tooltipWrapperSx}>
-            <NavigationElement
-              sx={styleNext}
+          {stepHasValidation && !canMoveNext ? (
+            <Button
               onClick={() => {
-                onNext();
+                onNext(true);
               }}
-              backType={btnNext}
+              sx={stylesSkip()}
             >
-              {stepHasValidation && !canMoveNext ? (
-                <Button
-                  onClick={() => {
-                    onNext(true);
-                  }}
-                  sx={stylesSkip()}
-                >
-                  SKIP
-                </Button>
-              ) : null}
-            </NavigationElement>
-          </Box>
-        </Tooltip>
+              SKIP
+            </Button>
+          ) : null}
+        </NavigationElement>
       </Box>
     </Box>
   );

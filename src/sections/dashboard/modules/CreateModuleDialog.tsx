@@ -46,12 +46,6 @@ interface FormValuesProps {
   active: boolean;
   tips: string;
   duration: string;
-  teacher_slides: string;
-  teacher_forum: string;
-  lesson_plans: string;
-  initial_enrolled: number;
-  initial_likes: number;
-  initial_stars: number;
 }
 
 interface Prop {
@@ -129,10 +123,7 @@ export default function CreateModuleDialog({
   const CreateCourseSchema = Yup.object().shape({
     name: Yup.string().required("Name is required"),
     description: Yup.string().required("Description is required") && Yup.string().max(100, "Write less then 100 characters"),
-    duration: Yup.string().trim().nullable().transform((v, o) => (o === "" ? null : v)).matches(durationRegexp, "Use key words: second, minute, hour, day, week, month, year. E.g: 1 hour 30 minutes"),
-    initial_likes: Yup.number().required("Initial likes is required").positive(),
-    initial_stars: Yup.number().required("Initial stars is required").positive(),
-    initial_enrolled: Yup.number().required("Initial enrolled is required").positive(),
+    duration: Yup.string().trim().nullable().transform((v, o) => (o === "" ? null : v)).matches(durationRegexp, "Use key words: second, minute, hour, day, week, month, year. E.g: 1 hour 30 minutes")
   });
 
   const methods = useForm<FormValuesProps>({
@@ -186,6 +177,25 @@ export default function CreateModuleDialog({
     setValue(newValue);
   };
 
+  const deleteTip = async (tips: string[]): Promise<void> => {
+    try {
+      if (isEdit && id) {
+        const data = methods.getValues();
+        await editModule({
+          id,
+          ...data,
+          tips: moduleTips ? moduleTips.filter((t) => !tips.includes(t)) : [],
+          duration: data.duration.trim(),
+        }).unwrap();
+        enqueueSnackbar("Tip deleted!");
+      }
+    } catch (error) {
+      enqueueSnackbar(error?.data?.message, {
+        variant: "error",
+      });
+    }
+  };
+
   return (
     <>
       <Box
@@ -211,7 +221,7 @@ export default function CreateModuleDialog({
                 >
                   <Tab label="General" {...a11yProps(0)} />
                   <Tab label="Lessons" {...a11yProps(1)} />
-                  <Tab label="Settings" {...a11yProps(2)} />
+                  {isEdit ? <Tab label="Tips" {...a11yProps(2)} /> : null}
                 </Tabs>
               ) : null}
             </Box>
@@ -282,6 +292,15 @@ export default function CreateModuleDialog({
                     />
 
                     <RHFTextField
+                      sx={{
+                        width: { xs: "100%", sm: "350px" },
+                        minWidth: "300px",
+                      }}
+                      name="duration"
+                      label="Module duration"
+                    />
+
+                    <RHFTextField
                       name="tips"
                       placeholder="Enter tip"
                       label="Add tip"
@@ -303,73 +322,15 @@ export default function CreateModuleDialog({
                 <ModuleLessonsAutocomplete id={id as string} />
               </Box>
             </TabPanel>
-            <TabPanel value={value} index={2}>
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={12}>
-                  <Box rowGap={3} display="grid" mt={2}>
-                    <RHFTextField
-                      sx={{
-                        width: { xs: "100%", sm: "350px" },
-                        minWidth: "300px",
-                      }}
-                      name="duration"
-                      label="Module duration"
-                    />
-                    <RHFTextField
-                      sx={{
-                        width: { xs: "100%", sm: "350px" },
-                        minWidth: "300px",
-                      }}
-                      name="initial_likes"
-                      label="Initial likes"
-                      type="number"
-                    />
-                    <RHFTextField
-                      sx={{
-                        width: { xs: "100%", sm: "350px" },
-                        minWidth: "300px",
-                      }}
-                      name="initial_stars"
-                      label="Initial stars"
-                      type="number"
-                    />
-                    <RHFTextField
-                      sx={{
-                        width: { xs: "100%", sm: "350px" },
-                        minWidth: "300px",
-                      }}
-                      name="initial_enrolled"
-                      label="Initial enrolled"
-                      type="number"
-                    />
-                    <RHFTextField
-                      sx={{
-                        width: { xs: "100%", sm: "350px" },
-                        minWidth: "300px",
-                      }}
-                      name="teacher_slides"
-                      label="Teacher slides link"
-                    />
-                    <RHFTextField
-                      sx={{
-                        width: { xs: "100%", sm: "350px" },
-                        minWidth: "300px",
-                      }}
-                      name="teacher_forum"
-                      label="Teacher forum link"
-                    />
-                    <RHFTextField
-                      sx={{
-                        width: { xs: "100%", sm: "350px" },
-                        minWidth: "300px",
-                      }}
-                      name="lesson_plans"
-                      label="Lesson plans link"
-                    />
-                  </Box>
-                </Grid>
-              </Grid>
-            </TabPanel>
+            {isEdit ? (
+              <TabPanel value={value} index={2}>
+                <TipsTab
+                  tips={moduleTips ?? []}
+                  deleteTip={deleteTip}
+                  isLoading={isEditLoading}
+                />
+              </TabPanel>
+            ) : null}
             <DialogActions>
               <Box
                 sx={{

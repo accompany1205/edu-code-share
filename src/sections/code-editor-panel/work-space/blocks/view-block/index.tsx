@@ -1,51 +1,60 @@
-import { type FC, useState } from "react";
-
+import { type FC } from "react";
 import { CgBrowser } from "react-icons/cg";
-import { TbArrowBarToRight } from "react-icons/tb";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
-import { toggleBrowser } from "src/redux/slices/code-panel-global";
-import { type RootState } from "src/redux/store";
+import { Typography } from "@mui/material";
 
 import BaseBlock from "../base-block";
-import BrowserView, { CodeDocument } from "./browser-view";
+import BrowserView from "./browser-view";
+
+import { type RootState } from "src/redux/store";
+import { toggleBrowser } from "src/redux/slices/code-panel-global";
+
+import { type SupportedLang } from "../..";
 
 interface IVueBlock {
-  code: CodeDocument | null;
+  code: string;
+  language: SupportedLang;
 }
 
-const ViewBlock: FC<IVueBlock> = ({ code }) => {
-  const dispatch = useDispatch();
+const ViewBlock: FC<IVueBlock> = ({ code, language }) => {
+  const dispatch = useDispatch()
   const isBrowserHidden = useSelector(
     (state: RootState) => state.codePanelGlobal.isBrowserHidden
   );
-
-  const [isOpenHeader, setIsOpenHeader] = useState<boolean>(true);
-
-  const takeHeaderSettings = (isOpen: boolean) => {
-    setIsOpenHeader(isOpen);
-  };
 
   if (isBrowserHidden) {
     return null;
   }
 
+  if (language === "html") {
+    return (
+      <BaseBlock
+        title={TITLE}
+        icon={icon}
+        className="browserTour"
+        hideTabsHandler={() => {
+          dispatch(toggleBrowser(true))
+        }}
+      >
+        <BrowserView value={code} />
+      </BaseBlock>
+    )
+  }
+
   return (
-    <BaseBlock
-      closeIcon={<TbArrowBarToRight size={20} />}
-      isLeftBtn={true}
-      title={TITLE}
-      icon={icon}
-      isLeftBlock={false}
-      className="browserTour"
-      hideTabsHandler={() => {
-        dispatch(toggleBrowser(true));
-      }}
-      takeHeaderSettings={takeHeaderSettings}
-    >
-      <BrowserView document={code} isOpenHeader={isOpenHeader} />
+    <BaseBlock title={TITLE} icon={icon}>
+      <Typography
+        mt="40px"
+        textAlign="center"
+        textTransform="uppercase"
+        color="#c4c4c4"
+        variant="h6"
+      >
+        LANGUAGE NOT SUPORTED
+      </Typography>
     </BaseBlock>
-  );
+  )
 };
 
 const TITLE = "Browser Preview";

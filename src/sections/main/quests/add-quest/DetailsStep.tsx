@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState } from "react";
 
 import {
   Avatar,
@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 
 import { RHFSelect, RHFTextField } from "@components";
-import { ICourse } from "src/redux/services/interfaces/courseUnits.interface";
+import { ICourse } from "@types";
 import { BaseResponseInterface } from "@utils";
 import { RHFRemirror } from "src/components/hook-form/RHFRemirror";
 import { AssignmentTypes } from "src/redux/enums/assignment-types.enum";
@@ -23,22 +23,19 @@ import {
 } from "./constants";
 
 export default function DetailsStep({
-    coursesData,
-  }: {
-    coursesData: {
-      data: Array<(ICourse & BaseResponseInterface)> | undefined,
-      isLoading: boolean
-    }
-  }): React.ReactElement {
+  coursesData,
+}: {
+  coursesData: {
+    data: (ICourse & BaseResponseInterface)[] | undefined;
+    isLoading: boolean;
+  };
+}): React.ReactElement {
   const theme = useTheme();
   const { data, isLoading } = coursesData;
   const [type, setType] = useState<AssignmentTypes>(AssignmentTypes.COURSE);
-  const [course, setCourse] = useState<string | null>(data?.[0].id ?? null);
-  const selectedCourse = useMemo(() => data?.find((c) => c.id === course), [data, course]);
-
-  useEffect(() => {
-    setCourse(data?.[0].id ?? null)
-  }, [data]);
+  const onChange = (event: any): void => {
+    setType(event.target.value);
+  };
 
   return (
     <Stack sx={{ gap: 4, minHeight: "630px" }}>
@@ -56,10 +53,7 @@ export default function DetailsStep({
             native
             name="type"
             size="small"
-            onChange={(event: any) => {
-              setType(event?.target?.value);
-              setCourse(null);
-            }}
+            onChange={onChange}
             value={type}
             sx={{ ...selectStyle(theme), textTransform: "capitalize" }}
           >
@@ -90,10 +84,6 @@ export default function DetailsStep({
                 native
                 name="course"
                 size="small"
-                onChange={(event: any) => {
-                  setCourse(event?.target?.value);
-                }}
-                value={course}
                 disabled={!data?.length}
                 sx={selectStyle(theme)}
               >
@@ -131,45 +121,11 @@ export default function DetailsStep({
         <Typography variant="h5" gutterBottom pl={2}>
           Select module
         </Typography>
-        {!isLoading ? (
-          <RHFSelect
-            native
-            name="module"
-            size="small"
-            sx={{
-              borderRadius: 1,
-              "& fieldset": { border: "none" },
-              background: theme.palette.mode === "light" ? "#fff" : "",
-              border: theme.palette.mode === "light" ? "" : "1px solid #fff",
-            }}
-          >
-            {!selectedCourse?.units?.length &&
-              <option key="empty" value="empty">
-                You don't have any module
-              </option>
-            }
-            {selectedCourse?.units
-              ? [
-                <option key="module" value="all">
-                  All modules
-                </option>,
-                ...selectedCourse?.units.map((unit) => (
-                  <option key={unit.id} value={unit.id}>
-                    {unit.name}
-                  </option>
-                ))
-              ]
-              : null}
-          </RHFSelect>
-        ) : (
-          <Skeleton
-            variant="rounded"
-            sx={(theme) => ({
-              height: "40px",
-              background: theme.palette.common.white,
-            })}
-          />
-        )}
+        <RHFSelect native name="module" size="small" sx={selectStyle(theme)}>
+          <option key="module" value="all">
+            All modules
+          </option>
+        </RHFSelect>
       </FormGroup>
       <FormGroup sx={{ position: "relative" }}>
         <Typography variant="h5" gutterBottom pl={2}>

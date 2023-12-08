@@ -1,61 +1,33 @@
-import { type FC, useEffect, useState } from "react";
+import React, { type FC, useState } from "react";
+
+import { useDebounceCallback } from "@hooks";
 
 import SkeletonViewBlock from "../skeleton-view-box";
 
-export interface CodeDocument {
-  htmlBody?: string[];
-  cssBody?: string[];
-  jsBody?: string[];
+interface IBrowserView {
+  value: string;
 }
 
-interface BrowserViewProps {
-  document: CodeDocument | null;
-  isOpenHeader?: boolean;
-}
+const BrowserView: FC<IBrowserView> = ({ value }) => {
+  const [staticValue, setStaticValue] =
+    useState<string>(value);
+  const handleDebouncedCallback = useDebounceCallback(1500);
 
-enum TagNames {
-  Style = "style",
-  Script = "script",
-}
+  handleDebouncedCallback(() => {
+    setStaticValue(value);
+  });
 
-const getBody = (bodyList: string[], tagName: TagNames): string =>
-  bodyList.reduce(
-    (res: string, body: string) => `
-    ${res}
+  if (!value) {
+    return (
+      <SkeletonViewBlock />
+    );
+  }
 
-    <${tagName}>
-      ${body}
-    </${tagName}>
-  `,
-    ""
-  );
-
-const BrowserView: FC<BrowserViewProps> = ({ document, isOpenHeader }) => {
-  const [docSrc, setDocSrc] = useState("");
-
-  useEffect(() => {
-    if (document == null) {
-      return;
-    }
-
-    const { htmlBody = [], cssBody = [], jsBody = [] } = document;
-    setDocSrc(`
-      <html style="height: 100%">
-        <head>
-          ${getBody(cssBody, TagNames.Style)}
-        </head>
-        <body style="height: 100%; margin: 0;">
-          ${htmlBody.join("\n")}
-          ${getBody(jsBody, TagNames.Script)}
-        </body>
-      </html>
-    `);
-  }, [document]);
-
-  return document != null ? (
-    <iframe srcDoc={docSrc} style={IFRAME_STYLE} />
-  ) : (
-    <SkeletonViewBlock isOpenHeader={isOpenHeader} />
+  return (
+    <iframe
+      style={IFRAME_STYLE}
+      src={"data:text/html," + encodeURIComponent(staticValue)}
+    />
   );
 };
 
@@ -63,6 +35,6 @@ const IFRAME_STYLE = {
   border: 0,
   width: "100%",
   height: "100%",
-};
+}
 
 export default BrowserView;

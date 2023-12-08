@@ -16,6 +16,7 @@ import {
 } from "../../../../codemirror/extensions/comments";
 import {
   AddCursor,
+  Cursor,
   addCursor,
   removeCursor,
 } from "../../../../codemirror/extensions/cursors";
@@ -26,9 +27,8 @@ const pushUpdates = async (
   roomId: string,
   version: number,
   fullUpdates: readonly Update[],
-  fileName: string,
-  timeout = 3000
-): Promise<{ status: boolean; updates: Update[] }> => {
+  fileName: string
+): Promise<boolean> => {
   // Strip off transaction data
   const updates = fullUpdates.map((u) => ({
     clientID: u.clientID,
@@ -36,26 +36,20 @@ const pushUpdates = async (
     effects: u.effects,
   }));
 
-  return await new Promise(function (resolve, reject) {
-    socket.timeout(timeout).emit(
-      EmitSocketEvents.Push,
-      {
-        roomId,
-        version,
-        updates: JSON.stringify(updates),
-        fileName: {
-          id: fileName,
-          name: fileName,
-        },
+  return await new Promise(function (resolve) {
+    socket.emit(EmitSocketEvents.Push, {
+      roomId,
+      version,
+      updates: JSON.stringify(updates),
+      fileName: {
+        id: fileName,
+        name: fileName,
       },
-      (err: unknown, data: { status: boolean; updates: Update[] }) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(data);
-      }
-    );
+    });
+
+    socket.once(SubscribedEvents.PushResponse, function (status: boolean) {
+      resolve(status);
+    });
   });
 };
 
@@ -63,28 +57,27 @@ const pullUpdates = async (
   socket: Socket,
   roomId: string,
   version: number,
-  fileName: string,
-  timeout = 3000
+  fileName: string
 ): Promise<readonly Update[]> => {
   return await new Promise(function (resolve) {
-    socket.emit(
-      EmitSocketEvents.Pull,
-      {
-        roomId,
-        version,
-        fileName: {
-          id: fileName,
-          name: fileName,
-        },
-        socketId: socket.id,
+    socket.emit(EmitSocketEvents.Pull, {
+      roomId,
+      version,
+      fileName: {
+        id: fileName,
+        name: fileName,
       },
-      (updates: string[]) => {
+      socketId: socket.id,
+    });
+
+    socket.once(
+      `${EmitSocketEvents.PullResponse}${roomId}${fileName}`,
+      function (updates) {
         resolve(updates);
       }
     );
   }).then((updates: any) =>
-    updates?.map((x: any) => {
-      const u = JSON.parse(x);
+    updates?.map((u: any) => {
       if (u.effects[0]) {
         const effects: Array<StateEffect<any>> = [];
 
@@ -246,89 +239,56 @@ export const peerExtension = ({
       private pushing = false;
       private done = false;
 
-      private readonly onConnectCallback: () => void;
-      private readonly onCodeUpdatedCallback: ({
-        socketId,
-      }: {
-        socketId: string;
-      }) => void;
-
       constructor(private readonly view: EditorView) {
-        void this.pull();
-
-        this.onConnectCallback = this.onConnect.bind(this);
-        this.onCodeUpdatedCallback = this.onCodeUpdated.bind(this);
-
-        socket.on("connect", this.onConnectCallback);
-        socket.on("codeUpdated", this.onCodeUpdatedCallback);
+        this.pull();
       }
 
-      async onConnect() {
-        await this.pull();
-        await this.push();
-      }
-
-      async onCodeUpdated({ socketId }: { socketId: string }) {
-        if (socketId !== socket.id) {
-          await this.pull();
+      update(update: ViewUpdate) {
+        if (update.docChanged || update.transactions[0]?.effects[0]) {
+          this.push();
         }
       }
 
-      update(update: ViewUpdate): void {
-        if (update.docChanged || update.transactions.length) void this.push();
-      }
-
-      async push(): Promise<void> {
+      async push() {
         const updates = sendableUpdates(this.view.state);
-        if (this.pushing || !updates.length) return;
-        this.pushing = true;
-        const version = getSyncedVersion(this.view.state);
-        try {
-          const { updates: pushedUpdates } = await pushUpdates(
-            socket,
-            roomId,
-            version,
-            updates,
-            fileName ?? ""
-          );
-          this.view.dispatch(receiveUpdates(this.view.state, pushedUpdates));
+        const isSkipped = this.pushing || !updates.length;
 
-          this.pushing = false;
-          // Check if we can send any updates after successful pull
-          if (sendableUpdates(this.view.state).length) {
-            await this.push();
-          }
-        } catch (e) {
-          // The push failed - we don't try again. It will automatically push again when the connection is restored
-          this.pushing = false;
+        if (isSkipped) {
+          return;
+        }
+
+        this.pushing = true;
+
+        const version = getSyncedVersion(this.view.state);
+        await pushUpdates(socket, roomId, version, updates, fileName ?? "");
+        this.pushing = false;
+        // Regardless of whether the push failed or new updates came in
+        // while it was running, try again if there's updates remaining
+        if (sendableUpdates(this.view.state).length) {
+          setTimeout(() => {
+            this.push();
+          }, 100);
         }
       }
 
-      async pull(): Promise<void> {
-        // We don't pull repeatedly - this is handled by the codeUpdated listener
-        const version = getSyncedVersion(this.view.state);
-        try {
+      async pull() {
+        while (!this.done) {
+          const version = getSyncedVersion(this.view.state);
           const updates = await pullUpdates(
             socket,
             roomId,
             version,
             fileName ?? ""
           );
-          this.view.dispatch(receiveUpdates(this.view.state, updates));
-
-          // Check if we can send any updates after successful pull
-          if (sendableUpdates(this.view.state).length) {
-            await this.push();
-          }
-        } catch (e) {
-          // The pull failed - we don't try again. It will automatically pull again when the connection is restored
+          const newUpdates = receiveUpdates(this.view.state, updates);
+          this.view.dispatch(newUpdates);
         }
       }
 
-      destroy(): void {
+      destroy() {
+        socket.off(EmitSocketEvents.PullResponse);
+        socket.off(`${EmitSocketEvents.PullResponse}${roomId}${fileName}`);
         this.done = true;
-        socket.off("connect", this.onConnectCallback);
-        socket.off("codeUpdated", this.onCodeUpdatedCallback);
       }
     }
   );

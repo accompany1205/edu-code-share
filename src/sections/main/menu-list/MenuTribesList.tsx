@@ -24,7 +24,6 @@ import { useGetStudentClassesQuery } from "src/redux/services/manager/classes-st
 
 import JoinClassModal from "./JoinTribeModal";
 import TribeListItem from "./TribesListItem";
-import { getAddTribeButtonSx } from "./constants";
 
 export default function MenuTribesList(): React.ReactElement {
   const theme = useTheme();
@@ -70,7 +69,7 @@ export default function MenuTribesList(): React.ReactElement {
       >
         {isLoading ? (
           <Stack gap={1} ml={isNavMini ? 0 : 2} sx={{ maxWidth: "150px" }}>
-            <Skeleton variant="rounded" height={40} width={40} />
+            <Skeleton variant="rounded" height={30} width={30} />
             {Array.from("12").map((el) => (
               <Skeleton variant="rounded" height={32} key={el} />
             ))}
@@ -79,7 +78,17 @@ export default function MenuTribesList(): React.ReactElement {
           <>
             <Button
               onClick={handleOpenPopover}
-              sx={(theme) => ({ ...getAddTribeButtonSx(theme, isNavMini) })}
+              sx={{
+                alignSelf: "flex-start",
+                borderRadius: 1,
+                minWidth: "30px",
+                p: 0,
+                ml: 2,
+                minHeight: "30px",
+                height: "30px",
+                color: theme.palette.info.light,
+                border: `2px solid ${theme.palette.info.light}`,
+              }}
             >
               <FaPlus size={20} />
             </Button>
@@ -87,15 +96,11 @@ export default function MenuTribesList(): React.ReactElement {
               sx={{
                 gap: 1,
                 height: containerHeignt,
-                width: "auto",
+                width: isNavMini ? "58px" : "auto",
               }}
             >
-              <Scrollbar sx={{ overflowX: "unset" }}>
-                <Stack
-                  pl={isNavMini ? 0 : 2}
-                  gap={1}
-                  alignItems={isNavMini ? "center" : "start"}
-                >
+              <Scrollbar>
+                <Stack pl={2} gap={1}>
                   {data?.data.map((c, i) => {
                     return (
                       <TribeListItem

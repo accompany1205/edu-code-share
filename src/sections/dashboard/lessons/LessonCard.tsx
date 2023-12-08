@@ -172,8 +172,6 @@ export default function LessonCard({
             description: lesson.description,
             active: lesson.active,
             tips: "",
-            independent: lesson.independent,
-            type: lesson.type,
           }}
           lessonTips={lesson.tips}
         >

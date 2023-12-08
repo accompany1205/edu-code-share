@@ -1,5 +1,4 @@
 import { type FC } from "react";
-
 import { Skeleton, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 
@@ -8,27 +7,18 @@ import {
   CODING_TYP_SX,
   PARENT_STACK_SX,
   SKELETON_SX,
-  getStackBottomSx,
-} from "./constants";
+  STACK_BOTTON_SX
+} from "./constants"
 
-interface ISkeletonProps {
-  isOpenHeader: boolean | undefined;
-}
-
-const SkeletonViewBlock: FC<ISkeletonProps> = ({ isOpenHeader }) => {
+const SkeletonViewBlock: FC = () => {
   return (
-    <Stack
-      sx={PARENT_STACK_SX}
-      width="100%"
-      height={isOpenHeader ? "calc(100% - 34px)" : "100vh"}
-    >
+    <Stack sx={PARENT_STACK_SX} width="100%" height="100vh">
       <Stack
         display="flex"
         direction="row"
         alignItems="center"
         justifyContent="space-between"
         mb="5px"
-        pl="30px"
       >
         <Skeleton height="18px" width="192px" sx={SKELETON_SX} />
         <Stack spacing={1} display="flex" direction="row">
@@ -53,16 +43,22 @@ const SkeletonViewBlock: FC<ISkeletonProps> = ({ isOpenHeader }) => {
         </Stack>
       </Stack>
 
-      <Stack sx={(theme) => ({ ...getStackBottomSx(theme) })}>
-        <Typography sx={AVAILABLE_TYP_SX} variant="subtitle1">
+      <Stack sx={STACK_BOTTON_SX}>
+        <Typography
+          sx={AVAILABLE_TYP_SX}
+          variant="subtitle1"
+        >
           No preview available?
         </Typography>
-        <Typography variant="subtitle1" sx={CODING_TYP_SX}>
+        <Typography
+          variant="subtitle1"
+          sx={CODING_TYP_SX}
+        >
           That means it’s time to get coding. 🤓
         </Typography>
       </Stack>
     </Stack>
   );
-};
+}
 
 export default SkeletonViewBlock;

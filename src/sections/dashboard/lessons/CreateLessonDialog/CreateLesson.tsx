@@ -17,7 +17,7 @@ import {
   Grid,
 } from "@mui/material";
 
-import { FormProvider, RHFSelect, RHFSwitch, RHFTextField } from "@components";
+import { FormProvider, RHFSwitch, RHFTextField } from "@components";
 import {
   useCreateLessonMutation,
   useUpdateLessonMutation,
@@ -128,22 +128,7 @@ export default function CreateLesson({
                     rows={3}
                   />
 
-                  <RHFSelect
-                    native
-                    name="type"
-                    size="small"
-                  >
-                    <option key="practical" value="practical">
-                      Practical
-                    </option>
-                    <option key="exercise" value="exercise">
-                      Exercise
-                    </option>
-                  </RHFSelect>
-
                   <RHFSwitch name="active" label="Lesson active" />
-
-                  <RHFSwitch name="independent" label="Independent lesson" />
                 </Box>
                 <Box
                   sx={{

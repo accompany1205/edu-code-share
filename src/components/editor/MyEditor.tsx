@@ -5,12 +5,11 @@ import { useS3Upload } from "next-s3-upload";
 import { ImageAttributes, ImageExtension } from "remirror/extensions";
 import "remirror/styles/all.css";
 
-import { BaseResponseInterface, isJson } from "@utils";
-import { useCreateMediaMutation } from "src/redux/services/manager/media-manager";
+import { isJson } from "@utils";
 
 import EditorToolbar from "./EditorToolbar";
 import { extensions } from "./extensions-template";
-import { ILessonContent } from "../../redux/services/interfaces/courseUnits.interface";
+import { useCreateMediaMutation } from "src/redux/services/manager/media-manager";
 
 interface FileWithProgress {
   file: File;
@@ -29,8 +28,6 @@ interface Props {
   setMultimediaValue?: (value: string) => void;
   onSubmit?: () => void;
   locked?: boolean;
-  data: (ILessonContent & BaseResponseInterface);
-  lessonId: string;
 }
 
 function Editor({
@@ -39,8 +36,6 @@ function Editor({
   onSubmit,
   multimediaValue,
   setMultimediaValue,
-  data,
-  lessonId
 }: Props): React.ReactElement {
   const { uploadToS3 } = useS3Upload();
   const [createMedia] = useCreateMediaMutation();
@@ -59,23 +54,21 @@ function Editor({
                   body: {},
                   headers: {
                     "x-tenant-id":
-                      localStorage.getItem("tenantName") ?? "codetribe",
-                  },
-                },
-              },
+                      localStorage.getItem("tenantName") ?? "codetribe"
+                  }
+                }
+              }
             }).then(({ url, key }) => {
               progress(completed / files.length);
               createMedia({
                 url,
                 name: file.name,
                 size: file.size,
-                type: "image",
-                acl: "public",
+                type: 'image',
+                acl: 'public',
+              }).unwrap().then(() => {
+                resolve({ src: url, fileName: key });
               })
-                .unwrap()
-                .then(() => {
-                  resolve({ src: url, fileName: key });
-                });
             });
           })
       );
@@ -149,7 +142,7 @@ function Editor({
         manager={manager}
         state={state}
         // initialContent={state}
-        autoFocus={editable}
+        autoFocus
         autoRender="end"
         onChange={(parameter) => {
           onChange(parameter);
@@ -162,10 +155,10 @@ function Editor({
       >
         {typeof locked === "undefined" ? (
           editable ? (
-            <EditorToolbar saveContent={saveContent} data={data} lessonId={lessonId} />
+            <EditorToolbar saveContent={saveContent} />
           ) : null
         ) : (
-          <EditorToolbar saveContent={saveContent} data={data} lessonId={lessonId} />
+          <EditorToolbar saveContent={saveContent} />
         )}
       </Remirror>
     </ThemeProvider>

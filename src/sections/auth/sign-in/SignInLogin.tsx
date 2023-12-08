@@ -20,15 +20,10 @@ import { styledRegisterInput } from "@sections/on-boarding-register/styles";
 import { useAuthContext } from "src/auth/useAuthContext";
 import { STUDENT_PATH_AFTER_LOGIN } from "src/config-global";
 
-interface IProps {
-  isValid?: boolean;
-}
-
 export default function SignInLogin({
-  isValid,
-  goToStep,
   nextStep,
-}: Partial<StepWizardChildProps> & IProps): React.ReactElement {
+  isValid,
+}: Partial<StepWizardChildProps> & { isValid?: boolean }): React.ReactElement {
   const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
   const { loginWithGoogle } = useAuthContext();
@@ -69,11 +64,6 @@ export default function SignInLogin({
           name="email"
           label="Email"
           sx={(theme) => ({ ...styledRegisterInput(theme) })}
-          onKeyDown={(e) => {
-            if (goToStep && isValid && e.code === "Enter") {
-              goToStep(2);
-            }
-          }}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
