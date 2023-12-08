@@ -66,11 +66,11 @@ export default function InviteTeacherDialog({
   const onSendInvite = async (): Promise<void> => {
     try {
       const user = await createUser({
+        id: "",
         email: filters.email,
         role: Role.Manager,
         first_name: "",
         last_name: "",
-        id: ""
       }).unwrap();
       enqueueSnackbar("Invite sent");
       await addUserToSchool(user.id, schoolId);

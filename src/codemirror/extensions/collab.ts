@@ -7,11 +7,10 @@ import {
 } from "@codemirror/collab";
 import { ChangeSet, Extension, StateEffect, Text } from "@codemirror/state";
 import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
-import { error } from "console";
 import { Socket } from "socket.io-client";
 
-import { AddComment, addComment, removeComment } from "./comments";
-import { AddCursor, addCursor, removeCursor } from "./cursors";
+import { addCursor, removeCursor } from "./cursors";
+import { error } from "console";
 
 async function pushUpdates(
   socket: Socket,
@@ -76,37 +75,18 @@ async function pullUpdates(
         const effects: Array<StateEffect<any>> = [];
 
         u.effects.forEach((effect: StateEffect<any>) => {
-          if (effect.value?.type === "add-cursor") {
-            const cursor: AddCursor = {
-              type: "add-cursor",
+          if (effect.value?.id && effect.value?.from !== undefined) {
+            const cursor = {
               id: effect.value.id,
               from: effect.value.from,
               to: effect.value.to,
             };
 
             effects.push(addCursor.of(cursor));
-          } else if (effect.value?.type === "remove-cursor") {
+          } else if (effect.value?.id) {
             // We don't want to remove the cursor on disconnect
             // const cursorId = effect.value.id;
             // effects.push(removeCursor.of(cursorId));
-          } else if (effect.value?.type === "add-comment") {
-            const comment: AddComment = {
-              type: "add-comment",
-              id: effect.value.id,
-              from: effect.value.from,
-              to: effect.value.to,
-              content: effect.value.content,
-              createdBy: effect.value.createdBy,
-            };
-
-            effects.push(addComment.of(comment));
-          } else if (effect.value?.type === "remove-comment") {
-            effects.push(
-              removeComment.of({
-                type: "remove-comment",
-                id: effect.value.id,
-              })
-            );
           }
         });
 
@@ -158,7 +138,7 @@ export const peerExtension = (
   socket: Socket,
   startVersion: number,
   id: string,
-  roomId: string
+  roomId: string,
 ): Extension[] => {
   const collabPlugin = collab({
     startVersion,
@@ -205,12 +185,7 @@ export const peerExtension = (
         this.pushing = true;
         const version = getSyncedVersion(this.view.state);
         try {
-          const { updates: pushedUpdates } = await pushUpdates(
-            socket,
-            roomId,
-            version,
-            updates
-          );
+          const { updates: pushedUpdates } = await pushUpdates(socket, roomId, version, updates);
           this.view.dispatch(receiveUpdates(this.view.state, pushedUpdates));
 
           this.pushing = false;

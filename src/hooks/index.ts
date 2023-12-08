@@ -13,5 +13,4 @@ export * from "./useOffSetTop";
 export * from "./useResponsive";
 export * from "./useWindowDimension";
 export * from "./useSocket";
-export * from "./useRealTimeConnection";
 export * from "./useRoomActivity";

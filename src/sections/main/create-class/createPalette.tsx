@@ -8,6 +8,7 @@ import {
   Collapse,
   Tab,
   Tabs,
+  Theme,
   alpha,
   useTheme,
 } from "@mui/material";
@@ -64,7 +65,7 @@ export default function CreatePalette({
               onClick={() => {
                 setChoosenColor(el);
               }}
-              sx={(theme) => ({
+              sx={(theme: Theme) => ({
                 borderRadius: 2,
                 border:
                   choosenColor === el
@@ -103,14 +104,14 @@ export default function CreatePalette({
 export const CLASS_PALETTE = [
   "#96ceb4",
   "#3d1e6d",
-  "#ffeead",
+  "#ffdd56",
   "#ff6f69",
-  "#ffcc5c",
+  "#e9b341",
   "#2e003e",
   "#854442",
   "#3c2f2f",
   "#068FFF",
-  "#bdeaee",
+  "#67dbe6",
   "#3d2352",
   "#ff77aa",
   "#76b4bd",
