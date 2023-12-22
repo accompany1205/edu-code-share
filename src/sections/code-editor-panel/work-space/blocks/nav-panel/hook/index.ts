@@ -48,8 +48,8 @@ export const useNavPanel = (wrapperListenerRef: RefObject<HTMLDivElement | null>
   const [previewdUsers, setPreviewdUsers] = useState<FriendUser[]>([]);
   const [draggableConfig, setDraggableConfig] = useState<DraggableBlockConfig | null>(null);
   const isCodePreviewVisible = useSelector(state => state.codePanelGlobal.isCodePreviewVisible);
-  const [isCodeBlocksVisible, setIsCodeBlocksVisible] = useState(false);
   const classId = useSelector(state => state?.codePanel?.class?.id);
+  const [isCodeBlocksVisible, setIsCodeBlocksVisible] = useState(false);
   const { filters, setFilter } = useFilters(DEFAULT_FILTERS)
   const [users, setUsers] = useState<FriendUser[]>([]);
 

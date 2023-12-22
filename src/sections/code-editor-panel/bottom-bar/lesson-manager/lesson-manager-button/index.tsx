@@ -12,7 +12,6 @@ import {
 import { Iconify } from "@components";
 import { type BaseResponseInterface } from "@utils";
 import { type ILesson } from "src/redux/interfaces/content.interface";
-import { useTranslate } from "src/utils/translateHelper";
 
 import { ICON_BTN_SX, TYP_SX, getButtonSx } from "./constants";
 
@@ -27,7 +26,6 @@ const LessonManagerButton: FC<LessonManagerButtonProps> = ({
 }) => {
   const theme = useTheme();
   const buttonSx = useMemo(() => getButtonSx(theme), [theme]);
-  const translate = useTranslate();
 
   return (
     <Stack
@@ -36,7 +34,7 @@ const LessonManagerButton: FC<LessonManagerButtonProps> = ({
       alignItems="center"
       onClick={onOpen}
     >
-      <Tooltip title={translate("lesson_list")} placement="top">
+      <Tooltip title="LESSONS LIST" placement="top">
         <IconButton className="lessonsTourMobile" sx={ICON_BTN_SX}>
           <Iconify icon="iconoir:page" />
         </IconButton>

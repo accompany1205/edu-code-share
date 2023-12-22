@@ -45,10 +45,7 @@ const BaseBlock: FC<IBaseBlock> = ({
   const theme = useTheme();
   const storageAvailable = localStorageAvailable();
   const isTabletAndMobile = useMediaQuery(theme.breakpoints.down(1000));
-  const boxStyles = useMemo(
-    () => getBoxStyles(isTabletAndMobile, theme),
-    [useTheme]
-  );
+  const boxStyles = useMemo(() => getBoxStyles(isTabletAndMobile), [useTheme]);
   const activeTab = useSelector((state) => state.mobileTabManager.activeTab);
 
   const getHeaderSettings = () => {

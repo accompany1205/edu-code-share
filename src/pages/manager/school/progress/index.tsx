@@ -32,7 +32,6 @@ import {
 } from "src/redux/services/manager/progress-manager";
 import { useGetStudentsQuery } from "src/redux/services/manager/students-manager";
 import { RootState } from "src/redux/store";
-import { useTranslate } from "src/utils/translateHelper";
 
 Progress.getLayout = (page: React.ReactElement) => (
   <SchoolDashboardLayout>{page}</SchoolDashboardLayout>
@@ -66,8 +65,6 @@ export default function Progress(): React.ReactElement {
     }
   );
 
-  const translate = useTranslate();
-
   const { data: students, isLoading } = useGetStudentsQuery(
     {
       schoolId,
@@ -86,20 +83,14 @@ export default function Progress(): React.ReactElement {
   return (
     <>
       <Head>
-        <title>{translate("progress")} | CodeTribe </title>
+        <title>Progress | CodeTribe </title>
       </Head>
       <Container sx={{ ml: 0 }}>
         <CustomBreadcrumbs
           heading=""
           links={[
-            {
-              name: translate("home"),
-              href: STUDENT_PATH_DASHBOARD.class.root,
-            },
-            {
-              name: translate("progress"),
-              href: MANAGER_PATH_DASHBOARD.school.progress,
-            },
+            { name: "Home", href: STUDENT_PATH_DASHBOARD.class.root },
+            { name: "Progress", href: MANAGER_PATH_DASHBOARD.school.progress },
           ]}
         />
         <Stack

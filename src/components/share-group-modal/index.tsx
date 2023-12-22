@@ -28,7 +28,6 @@ import RoleBasedGuard from "src/auth/RoleBasedGuard";
 import { IClass } from "src/redux/interfaces/class.interface";
 import { Role } from "src/redux/services/enums/role.enum";
 import { useUpdateClassesSettingsMutation } from "src/redux/services/manager/classes-manager";
-import { useTranslate } from "src/utils/translateHelper";
 
 import ClassroomModal from "../classroom-modal";
 import EmailAddressModal from "../email-address-domain";
@@ -68,7 +67,6 @@ export default function ShareGroupModal({
   const [value, setValue] = useState(
     schoolClass.setting.request_join_enable ? "true" : "false"
   );
-  const translate = useTranslate();
   const [updateClass, { isLoading }] = useUpdateClassesSettingsMutation();
 
   const handleOpen = () => {
@@ -85,7 +83,7 @@ export default function ShareGroupModal({
   const onCopy = (textToCopy: string) => {
     if (textToCopy) {
       copy(textToCopy);
-      enqueueSnackbar(translate("messages_copied"));
+      enqueueSnackbar("Copied!");
     }
   };
 
@@ -96,7 +94,7 @@ export default function ShareGroupModal({
         classId: query.id as string,
         request_join_enable: (e.target as HTMLInputElement).value === "true",
       }).unwrap();
-      enqueueSnackbar(translate("messages_changes_updated"));
+      enqueueSnackbar("Changes updated!");
     } catch (error) {
       enqueueSnackbar(error.message, { variant: "error" });
     }
@@ -147,10 +145,10 @@ export default function ShareGroupModal({
               variant="h4"
               textAlign="center"
             >
-              {translate("share_group")}
+              Share group
             </Typography>
             <Typography sx={subtitleSx} variant="body2">
-              {translate("share_send_link")}
+              Send the link below to invite students to the group.
             </Typography>
           </Box>
           <Box sx={copySx}>
@@ -159,7 +157,7 @@ export default function ShareGroupModal({
                 <Iconify icon="basil:copy-outline" width={18} height={18} />
               </Button>
               <Box ml="10px">
-                <Typography>{translate("share_invite_link")}</Typography>
+                <Typography>Invite link:</Typography>
                 <Typography noWrap sx={LINK_TEXT_SX}>
                   {shareLink}
                 </Typography>
@@ -172,7 +170,7 @@ export default function ShareGroupModal({
               }}
               sx={COPY_BIG}
             >
-              {translate("actions_copy")}
+              Copy
             </Button>
           </Box>
           <RoleBasedGuard
@@ -196,7 +194,7 @@ export default function ShareGroupModal({
                     control={<Radio disabled={isLoading} sx={RADIO_SX} />}
                     label={
                       <Typography color={isLight ? "#292929" : ""} variant="h6">
-                        {translate("share_can_join")}
+                        Anyone with the link can join
                       </Typography>
                     }
                   />
@@ -206,7 +204,7 @@ export default function ShareGroupModal({
                     control={<Radio sx={RADIO_SX} />}
                     label={
                       <Typography color={isLight ? "#292929" : ""} variant="h6">
-                        {translate("share_only_people_approve")}
+                        Only people you approve can join
                       </Typography>
                     }
                   />
@@ -220,15 +218,13 @@ export default function ShareGroupModal({
             />
             <Box ml="15px" mt="28px" mb="28px">
               <Typography variant="h6" sx={subtitleFooterSx}>
-                {translate("share_other_ways_to_add")}
+                Other ways to add students:
               </Typography>
               <ClassroomModal schoolId={schoolClass?.school?.id ?? ""}>
                 <Button fullWidth sx={CLASS_ROOM_BTN_SX}>
                   <Box display="flex" alignItems="center">
                     <SiGoogleclassroom size={24} />
-                    <Typography ml={2}>
-                      {translate("share_google_classroom")}
-                    </Typography>
+                    <Typography ml={2}> Google Classroom</Typography>
                   </Box>
                   <AiOutlineArrowRight />
                 </Button>
@@ -240,9 +236,7 @@ export default function ShareGroupModal({
                 <Button fullWidth sx={EMAIL_BTN_SX}>
                   <Box display="flex" alignItems="center">
                     <MdOutlineMail size={24} />
-                    <Typography ml={2}>
-                      {translate("share_email_address")}
-                    </Typography>
+                    <Typography ml={2}> Email address or domain</Typography>
                   </Box>
                   <AiOutlineArrowRight />
                 </Button>

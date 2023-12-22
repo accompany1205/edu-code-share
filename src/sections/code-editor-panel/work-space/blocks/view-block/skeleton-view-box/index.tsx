@@ -3,8 +3,6 @@ import { type FC, useMemo } from "react";
 import { Skeleton, Typography, useTheme } from "@mui/material";
 import { Stack } from "@mui/system";
 
-import { useTranslate } from "src/utils/translateHelper";
-
 import {
   AVAILABLE_TYP_SX,
   CODING_TYP_SX,
@@ -18,7 +16,6 @@ interface ISkeletonProps {
 }
 
 const SkeletonViewBlock: FC<ISkeletonProps> = ({ isOpenHeader }) => {
-  const translate = useTranslate();
   const theme = useTheme();
   const isLight = theme.palette.mode === "light";
   const skeletonSx = useMemo(() => getSkeletonSx(isLight), [isLight]);
@@ -67,10 +64,10 @@ const SkeletonViewBlock: FC<ISkeletonProps> = ({ isOpenHeader }) => {
 
       <Stack sx={bottonStackSx}>
         <Typography sx={AVAILABLE_TYP_SX} variant="subtitle1">
-          {translate("no_preview_available")}
+          No preview available?
         </Typography>
         <Typography variant="subtitle1" sx={CODING_TYP_SX}>
-          {translate("means_time_to_code")} 🤓
+          That means it’s time to get coding. 🤓
         </Typography>
       </Stack>
     </Stack>

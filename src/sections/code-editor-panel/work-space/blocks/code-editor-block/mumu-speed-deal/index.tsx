@@ -11,10 +11,8 @@ import {
 
 import SolutionMobileDialog from "@sections/code-editor-panel/top-bar/nav-bar/options/help-popup/options/solution-mobile-dialog";
 import UnstuckMobileDialog from "@sections/code-editor-panel/top-bar/nav-bar/options/help-popup/options/unstack-dialogs/UnstuckMobileDialog";
-import { useCodePanel } from "src/hooks/useCodePanel";
 import { useGetLessonStudentQuery } from "src/redux/services/manager/lesson-student";
 import { useSelector } from "src/redux/store";
-import { useTranslate } from "src/utils/translateHelper";
 
 import TipsPopover from "../tips-popover";
 import { IActionDialogType, actions, actionsTips } from "./config";
@@ -24,6 +22,7 @@ import {
   getSpeedDealFabProps,
   getSpeedDealStyles,
 } from "./constants";
+import { useCodePanel } from "src/hooks/useCodePanel";
 
 interface MumuSpeedDialProps {
   typing: boolean | null;
@@ -39,15 +38,17 @@ const MumuSpeedDial: FC<MumuSpeedDialProps> = ({ typing }) => {
   const [openPoper, setOpenPoper] = useState<boolean>(false);
   const [speedDeal, setSpeedDial] = useState<boolean>(false);
   const [dialogType, setDialogType] = useState<IActionDialogType | null>(null);
-  const translate = useTranslate();
+
   const lessonId = useSelector((state) => state.codePanelGlobal.lessonId);
   const slideIndex = useSelector((state) => state.codePanelGlobal.slideIndex);
   const {
-    workSpaceProps: { data: workSpaceData },
+    workSpaceProps: {
+      data: workSpaceData
+    },
   } = useCodePanel();
   const { data, isLoading } = useGetLessonStudentQuery({ id: lessonId });
 
-  const slideTips = (workSpaceData[slideIndex]?.tips ?? "").split("\n");
+  const slideTips = (workSpaceData[slideIndex]?.tips ?? '').split('\n');
 
   const speedDealProps = useMemo(
     () => getSpeedDealFabProps(speedDeal),
@@ -127,7 +128,7 @@ const MumuSpeedDial: FC<MumuSpeedDialProps> = ({ typing }) => {
             }}
             tooltipTitle={
               <Typography sx={{ color: action.color, p: "2px" }}>
-                {translate(action.name)}
+                {action.name}
               </Typography>
             }
             FabProps={SPEED_DEAL_ACTION_FAB_PROPS}

@@ -1,12 +1,12 @@
 import dynamic from "next/dynamic";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { FullScreen } from "react-full-screen";
 import { Socket, io } from "socket.io-client";
 
-import { Box } from "@mui/material";
+import { Box, Theme, useTheme } from "@mui/material";
 
 import SkeletonCodePanel, {
   CPTopBarSkeleton,
@@ -49,10 +49,12 @@ const LessonsManager = dynamic(
 const CONFETI_GRAVITY = 0.25;
 const MAX_NUMBER_OF_PIECES = 500;
 const MIN_NUMBER_OF_PIECES = 0;
-const BOX_PROPS = {
+const getBoxProps = (theme: Theme) => ({
+  bgcolor:
+    theme.palette.mode === "light" ? "white" : theme.palette.background.neutral,
   position: "relative",
   overflow: "hidden",
-};
+});
 
 export default function Index(): React.ReactElement | null {
   const {
@@ -66,6 +68,8 @@ export default function Index(): React.ReactElement | null {
     lessonManagerProps,
   } = useCodePanel();
 
+  const theme = useTheme();
+  const boxProps = useMemo(() => getBoxProps(theme), [theme]);
   const { user } = useAuthContext();
 
   const router = useRouter();
@@ -120,7 +124,7 @@ export default function Index(): React.ReactElement | null {
 
           <SignUpDialog isSigned={!!workSpaceProps.user} />
 
-          <Box sx={BOX_PROPS}>
+          <Box sx={boxProps}>
             <TopPanel
               chatComponent={null}
               onHanldeFullScreen={handle.active ? handle.exit : handle.enter}

@@ -7,11 +7,10 @@ import "remirror/styles/all.css";
 
 import { BaseResponseInterface, isJson } from "@utils";
 import { useCreateMediaMutation } from "src/redux/services/manager/media-manager";
-import { useTranslate } from "src/utils/translateHelper";
 
-import { ILessonContent } from "../../redux/services/interfaces/courseUnits.interface";
 import EditorToolbar from "./EditorToolbar";
 import { extensions } from "./extensions-template";
+import { ILessonContent } from "../../redux/services/interfaces/courseUnits.interface";
 
 interface FileWithProgress {
   file: File;
@@ -30,7 +29,7 @@ interface Props {
   setMultimediaValue?: (value: string) => void;
   onSubmit?: () => void;
   locked?: boolean;
-  data: ILessonContent & BaseResponseInterface;
+  data: (ILessonContent & BaseResponseInterface);
   lessonId: string;
 }
 
@@ -41,11 +40,10 @@ function Editor({
   multimediaValue,
   setMultimediaValue,
   data,
-  lessonId,
+  lessonId
 }: Props): React.ReactElement {
   const { uploadToS3 } = useS3Upload();
   const [createMedia] = useCreateMediaMutation();
-  const translate = useTranslate();
   const uploadHandler = (files: FileWithProgress[]): DelayedImage[] => {
     let completed = 0;
     const promises: Array<DelayedPromiseCreator<ImageAttributes>> = [];
@@ -147,7 +145,7 @@ function Editor({
       </style>
       <Remirror
         editable={editable}
-        placeholder={translate("start_type_here")}
+        placeholder="Start type here ..."
         manager={manager}
         state={state}
         // initialContent={state}
@@ -164,18 +162,10 @@ function Editor({
       >
         {typeof locked === "undefined" ? (
           editable ? (
-            <EditorToolbar
-              saveContent={saveContent}
-              data={data}
-              lessonId={lessonId}
-            />
+            <EditorToolbar saveContent={saveContent} data={data} lessonId={lessonId} />
           ) : null
         ) : (
-          <EditorToolbar
-            saveContent={saveContent}
-            data={data}
-            lessonId={lessonId}
-          />
+          <EditorToolbar saveContent={saveContent} data={data} lessonId={lessonId} />
         )}
       </Remirror>
     </ThemeProvider>

@@ -28,7 +28,6 @@ import { useDeleteAssignmentMutation } from "src/redux/services/manager/assignme
 import {
   usePinAssignmentMutation, // useUnpinAssignmentMutation,
 } from "src/redux/services/manager/assignments-student";
-import { useTranslate } from "src/utils/translateHelper";
 
 interface IQuestItemProps {
   assignment: IAssignmentReduced;
@@ -46,7 +45,7 @@ export default function QuestItem({
 
   const [openPopover, setOpenPopover] = useState<HTMLElement | null>(null);
   const [openConfirm, setOpenConfirm] = useState(false);
-  const translate = useTranslate();
+
   const [pinAssignment] = usePinAssignmentMutation();
   // const [unpinAssignment, { isLoading: isLoadingUnpin }] =
   //   useUnpinAssignmentMutation();
@@ -57,9 +56,9 @@ export default function QuestItem({
     try {
       await pinAssignment({ assignmentId: assignment.id }).unwrap();
       // await unpinAssignment({assignmentId: assignment.id}).unwrap();
-      enqueueSnackbar(translate("home_assignment_pined"));
+      enqueueSnackbar("assignment pined");
     } catch (e) {
-      enqueueSnackbar(translate("messages_error"), { variant: "error" });
+      enqueueSnackbar("something went wrong", { variant: "error" });
     }
   };
 
@@ -69,9 +68,9 @@ export default function QuestItem({
         schoolId,
         assignmentId: assignment.id,
       }).unwrap();
-      enqueueSnackbar(translate("home_assignment_deleted"));
+      enqueueSnackbar("assignment deleted");
     } catch (e) {
-      enqueueSnackbar(translate("messages_error"), { variant: "error" });
+      enqueueSnackbar("something went wrong", { variant: "error" });
     }
     handleCloseConfirm();
   };
@@ -142,8 +141,7 @@ export default function QuestItem({
                   })}
                 </Typography>
                 <Typography variant="body2">
-                  {translate("due")}:{" "}
-                  {format(new Date(assignment.end_date), "MM.dd.yyyy")}
+                  Due: {format(new Date(assignment.end_date), "MM.dd.yyyy")}
                 </Typography>
               </Stack>
             </Stack>
@@ -172,7 +170,7 @@ export default function QuestItem({
                   color: "inherit",
                 }}
               >
-                {translate("keep_coding")}
+                Get Coding Now
                 <Iconify
                   icon="maki:arrow"
                   width={18}
@@ -189,7 +187,7 @@ export default function QuestItem({
                   color: theme.palette.grey[500],
                 })}
               >
-                {translate("actions_see_more")}
+                See more
                 <RiExternalLinkLine size={15} style={{ marginLeft: "3px" }} />
               </Link>
             </Stack>
@@ -266,7 +264,7 @@ export default function QuestItem({
         >
           <MenuItem>
             <Iconify icon="eva:edit-fill" />
-            {translate("actions_edit")}
+            Edit
           </MenuItem>
         </Link>
         <MenuItem
@@ -277,14 +275,14 @@ export default function QuestItem({
           sx={{ color: "error.main" }}
         >
           <Iconify icon="eva:trash-2-outline" />
-          {translate("actions_delete")}
+          Delete
         </MenuItem>
       </MenuPopover>
       <ConfirmDialog
         open={openConfirm}
         onClose={handleCloseConfirm}
-        title={translate("actions_delete")}
-        content={translate("messages_delete_question")}
+        title="Delete"
+        content="Are you sure want to delete?"
         action={
           <LoadingButton
             variant="contained"
@@ -292,7 +290,7 @@ export default function QuestItem({
             onClick={onDelete}
             loading={isDeleting}
           >
-            {translate("actions_delete")}
+            Delete
           </LoadingButton>
         }
       />

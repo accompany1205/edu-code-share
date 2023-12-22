@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 import {
   Avatar,
@@ -10,11 +10,10 @@ import {
 } from "@mui/material";
 
 import { RHFSelect, RHFTextField } from "@components";
+import { ICourse } from "src/redux/services/interfaces/courseUnits.interface";
 import { BaseResponseInterface } from "@utils";
 import { RHFRemirror } from "src/components/hook-form/RHFRemirror";
 import { AssignmentTypes } from "src/redux/enums/assignment-types.enum";
-import { ICourse } from "src/redux/services/interfaces/courseUnits.interface";
-import { useTranslate } from "src/utils/translateHelper";
 
 import {
   AVATAR_SX,
@@ -24,25 +23,21 @@ import {
 } from "./constants";
 
 export default function DetailsStep({
-  coursesData,
-}: {
-  coursesData: {
-    data: Array<ICourse & BaseResponseInterface> | undefined;
-    isLoading: boolean;
-  };
-}): React.ReactElement {
+    coursesData,
+  }: {
+    coursesData: {
+      data: Array<(ICourse & BaseResponseInterface)> | undefined,
+      isLoading: boolean
+    }
+  }): React.ReactElement {
   const theme = useTheme();
   const { data, isLoading } = coursesData;
   const [type, setType] = useState<AssignmentTypes>(AssignmentTypes.COURSE);
   const [course, setCourse] = useState<string | null>(data?.[0].id ?? null);
-  const selectedCourse = useMemo(
-    () => data?.find((c) => c.id === course),
-    [data, course]
-  );
-  const translate = useTranslate();
+  const selectedCourse = useMemo(() => data?.find((c) => c.id === course), [data, course]);
 
   useEffect(() => {
-    setCourse(data?.[0].id ?? null);
+    setCourse(data?.[0].id ?? null)
   }, [data]);
 
   return (
@@ -55,7 +50,7 @@ export default function DetailsStep({
           }}
         >
           <Typography variant="h5" gutterBottom pl={2}>
-            {translate("quest_select_type")}
+            Select type
           </Typography>
           <RHFSelect
             native
@@ -88,7 +83,7 @@ export default function DetailsStep({
             }}
           >
             <Typography variant="h5" gutterBottom pl={2}>
-              {translate("quest_select_course")}
+              Select a course
             </Typography>
             {!isLoading ? (
               <RHFSelect
@@ -104,7 +99,7 @@ export default function DetailsStep({
               >
                 {!data?.length && (
                   <option key="empty" value="empty">
-                    {translate("quest_you_dont_have_courses_msg")}
+                    You don't have any courses
                   </option>
                 )}
                 {data
@@ -134,7 +129,7 @@ export default function DetailsStep({
         }}
       >
         <Typography variant="h5" gutterBottom pl={2}>
-          {translate("auest_select_module")}
+          Select module
         </Typography>
         {!isLoading ? (
           <RHFSelect
@@ -148,22 +143,22 @@ export default function DetailsStep({
               border: theme.palette.mode === "light" ? "" : "1px solid #fff",
             }}
           >
-            {!selectedCourse?.units?.length && (
+            {!selectedCourse?.units?.length &&
               <option key="empty" value="empty">
-                {translate("quest_you_dont_have_module_msg")}
+                You don't have any module
               </option>
-            )}
+            }
             {selectedCourse?.units
               ? [
-                  <option key="module" value="all">
-                    {translate("quest_all_modules")}
-                  </option>,
-                  ...selectedCourse?.units.map((unit) => (
-                    <option key={unit.id} value={unit.id}>
-                      {unit.name}
-                    </option>
-                  )),
-                ]
+                <option key="module" value="all">
+                  All modules
+                </option>,
+                ...selectedCourse?.units.map((unit) => (
+                  <option key={unit.id} value={unit.id}>
+                    {unit.name}
+                  </option>
+                ))
+              ]
               : null}
           </RHFSelect>
         ) : (
@@ -178,17 +173,17 @@ export default function DetailsStep({
       </FormGroup>
       <FormGroup sx={{ position: "relative" }}>
         <Typography variant="h5" gutterBottom pl={2}>
-          {translate("quest_name")}
+          Quest name
         </Typography>
         <Avatar sx={AVATAR_SX}>🤩</Avatar>
         <RHFTextField sx={inputNameStyles(theme)} name="name" />
         <Typography variant="caption" sx={INPUT_TEXT_SX}>
-          {translate("quest_edit_name_msg")}
+          You can edit the suggested name that is auto-generated.
         </Typography>
       </FormGroup>
       <FormGroup>
         <Typography variant="h5" gutterBottom pl={2}>
-          {translate("quest_description")}
+          Description (Optional)
         </Typography>
         <RHFRemirror name="description" />
       </FormGroup>

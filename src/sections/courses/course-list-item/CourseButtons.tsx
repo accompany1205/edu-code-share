@@ -4,7 +4,6 @@ import { MouseEvent } from "react";
 import { Button, Link, Stack } from "@mui/material";
 
 import { STUDENT_PATH_DASHBOARD } from "@routes/student.paths";
-import { useTranslate } from "src/utils/translateHelper";
 
 import {
   CONTINUE_COURSE_BTN_SX,
@@ -24,7 +23,6 @@ export default function CourseButtons({
   courseId,
 }: Props): React.ReactElement {
   const { push } = useRouter();
-  const translate = useTranslate();
   return (
     <Stack direction="row" sx={{ gap: { xs: 1, sm: 3 }, pb: 3, pt: 2 }}>
       {progress && progress > 0 ? (
@@ -38,15 +36,15 @@ export default function CourseButtons({
           variant="outlined"
           sx={CONTINUE_COURSE_BTN_SX}
         >
-          {translate("actions_continue")} 🙌🏾
+          Continue 🙌🏾
         </Button>
       ) : (
         <Button onClick={redirect} variant="outlined" sx={ENROLL_COURSE_BTN_SX}>
-          {translate("actions_enroll_now")} 👊🏽
+          Enroll Now 👊🏽
         </Button>
       )}
       <Button onClick={redirect} variant="outlined" sx={EXPLORE_COURSE_BTN_SX}>
-        {translate("actions_explore")}
+        Explore
       </Button>
     </Stack>
   );

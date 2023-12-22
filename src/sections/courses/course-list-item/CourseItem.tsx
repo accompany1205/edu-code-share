@@ -15,7 +15,6 @@ import {
 
 import { STUDENT_PATH_DASHBOARD } from "@routes/student.paths";
 import { ICourseElement } from "src/redux/interfaces/content.interface";
-import { useTranslate } from "src/utils/translateHelper";
 
 import CourseAvatar from "./CourseAvarar";
 import CourseButtons from "./CourseButtons";
@@ -35,7 +34,6 @@ export default function CoursesItem({ course }: Props): React.ReactElement {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [open, setOpen] = useState(false);
-  const translate = useTranslate();
 
   const redirect = (): void => {
     push(`${STUDENT_PATH_DASHBOARD.courses.course(course.id)}`);
@@ -95,9 +93,7 @@ export default function CoursesItem({ course }: Props): React.ReactElement {
               ))}
             </Stack>
             <CourseStatistics
-              likesCount={
-                course.initial_likes + parseInt(course.likes_count ?? "0")
-              }
+              likesCount={course.initial_likes + parseInt(course.likes_count ?? '0')}
               enrolledCount={course.initial_enrolled}
               starsCount={course.initial_stars}
             />
@@ -114,9 +110,7 @@ export default function CoursesItem({ course }: Props): React.ReactElement {
               setOpen(!open);
             }}
           >
-            {open
-              ? translate("actions_show_less")
-              : translate("actions_see_more")}
+            {open ? "Show less" : "See more"}
             {open ? (
               <SlArrowUp style={{ marginLeft: "10px" }} />
             ) : (
