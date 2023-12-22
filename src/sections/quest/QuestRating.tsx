@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 
 import { STUDENT_PATH_DASHBOARD } from "@routes/student.paths";
+import { useTranslate } from "src/utils/translateHelper";
 
 interface IQuestRatingProps {
   courseName: string;
@@ -26,6 +27,8 @@ export default function QuestRating({
   courseName,
   progress,
 }: IQuestRatingProps): React.ReactElement {
+  const translate = useTranslate();
+
   return (
     <>
       <Card
@@ -37,13 +40,22 @@ export default function QuestRating({
       >
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Stack gap={1}>
-            <Tooltip title="some">
+            <Tooltip
+              title={
+                <Typography variant="body2">
+                  This content has been linked to this quest and should be
+                  completed.
+                </Typography>
+              }
+            >
               <Typography
                 display="inline-flex"
                 alignItems="center"
                 variant="body1"
+                sx={{ cursor: "pointer" }}
               >
-                Course <BsFillInfoCircleFill style={{ marginLeft: "5px" }} />
+                {translate("course")}
+                <BsFillInfoCircleFill style={{ marginLeft: "5px" }} />
               </Typography>
             </Tooltip>
             <Typography variant="h4">{courseName}</Typography>
@@ -67,7 +79,7 @@ export default function QuestRating({
                 gap: 1,
               }}
             >
-              Open
+              {translate("open")}
               <RiShareBoxFill size={22} />
             </Link>
           </Stack>
