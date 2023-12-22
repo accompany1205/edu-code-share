@@ -1,11 +1,10 @@
 import { type FC, memo, useCallback, useEffect, useRef, useState } from "react";
-import io from "socket.io-client";
 
 import { BiCodeAlt } from "react-icons/bi";
 import { useDispatch } from "react-redux";
+
 import { Box, Collapse, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { setUserState } from "src/redux/slices/global";
 
 import { type BaseResponseInterface } from "@utils";
 import { type AuthUserType } from "src/auth/types";
@@ -21,23 +20,17 @@ import Checkers from "./checkers-code-editor";
 import { CodingSymbols, CodingTools } from "./coding-controls";
 import MumuSpeedDial from "./mumu-speed-deal";
 import Title from "./title";
-import { RootState } from "src/redux/store";
-import { EmitSocketEvents, SubscribedEvents } from "src/components/code-editor-collab/hook/utils/socket";
-import { useSocket } from "@hooks";
-
-import { el } from "date-fns/locale";
-import { GiConsoleController } from "react-icons/gi";
 
 interface ICodeEditorBlock {
-  user: AuthUserType | null
-  code: string
-  onChangeCode: (code: Record<string, string>) => void
-  validations: Array<IValidation & BaseResponseInterface>
-  preloadedCode: string
+  user: AuthUserType | null;
+  code: string;
+  onChangeCode: (code: Record<string, string>) => void;
+  validations: Array<IValidation & BaseResponseInterface>;
+  preloadedCode: string;
 }
 
 const icon = <BiCodeAlt size="20px" color="#43D4DD" />;
-const TYPING_DELEY = 30000;
+const TYPING_DELEY = 20000;
 const FIRST_LOADING_DELEY = 15000;
 const MOBILE_HEIGHT = 80;
 const DESKTOP_HEIGHT = 145;
@@ -59,10 +52,6 @@ const CodeEditorBlock: FC<ICodeEditorBlock> = ({
   const timer = useRef<NodeJS.Timeout>();
   const preloadedCodeRef = useRef(preloadedCode);
   const codeRef = useRef(code);
-  
-  const userdata = useSelector((state: RootState) => state.global.user);
-  
-
 
   const typingListener = (deley: number, firstLoad: boolean): void => {
     if (!firstLoad) {
@@ -78,29 +67,10 @@ const CodeEditorBlock: FC<ICodeEditorBlock> = ({
     }, deley);
   };
 
-  const socket = useSocket()
-  
-
   useEffect(() => {
     typingListener(FIRST_LOADING_DELEY, true);
   }, []);
 
-  console.log("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM: " + typing)
-  useEffect(() => {
-    console.log("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM: " + typing)
-    const userId =  user?.id;
-    if(typing === true){
-      dispatch(setUserState({userId: user?.id, status: "idle"}))
-      const status = "idle"
-      socket.emit(EmitSocketEvents.ChangeUserState, userId, status);
-    } else {
-       const status =  "active"
-      socket.emit(EmitSocketEvents.ChangeUserState, userId, status);
-      dispatch(setUserState({userId: user?.id, status: "active"}))
-    }
-
-  }, [user, typing])
-  
   useEffect(() => {
     if (code) {
       typingListener(TYPING_DELEY, false);

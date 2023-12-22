@@ -19,7 +19,7 @@ import HidedTabBtn from "./HidedTabBtn";
 import MumuSpeedDial from "./MumuSpeedDial";
 import Checkers from "./checkers-code-editor";
 
-const TYPING_DELEY = 30000;
+const TYPING_DELEY = 20000;
 const FIRST_LOADING_DELEY = 15000;
 const MOBILE_HEIGHT = 80;
 const DESKTOP_HEIGHT = 145;
@@ -60,9 +60,7 @@ const CodeEditorBlock = ({
   };
   useEffect(() => {
     typingListener(FIRST_LOADING_DELEY, true);
-    console.log("ddddddddddddddddddddddddddddddddddd" + typing)
   }, []);
-  
   useEffect(() => {
     if (code) {
       typingListener(TYPING_DELEY, false);

@@ -42,11 +42,6 @@ export interface IContacts {
   phone: string;
 }
 
-export interface UserState {
-  userId: string;
-  status: string;
-}
-
 export interface ISettings {
   language: string;
   marketplace_content_allowed: boolean;

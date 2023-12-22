@@ -27,7 +27,6 @@ export enum EmitSocketEvents {
   CreateFile = "createFile",
   AddFileResponse = "addFileResponse",
   AddedFileListUpdated = "addedFileListUpdated",
-  ChangeUserState = "changeUserState",
 }
 
 export const unsubscribeSocket = (socket: Socket | null): void => {
