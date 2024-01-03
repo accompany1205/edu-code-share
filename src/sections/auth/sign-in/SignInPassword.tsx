@@ -1,14 +1,25 @@
-import { useEffect, useState } from "react";
+import NextLink from "next/link";
+import { useEffect, useMemo, useState } from "react";
 
 import { MdArrowBackIosNew } from "react-icons/md";
 import { StepWizardChildProps } from "react-step-wizard";
 
 import { LoadingButton } from "@mui/lab";
-import { IconButton, InputAdornment, Stack, Typography } from "@mui/material";
+import {
+  IconButton,
+  InputAdornment,
+  Link,
+  Stack,
+  Typography,
+  useTheme,
+} from "@mui/material";
 
 import { Iconify, RHFTextField } from "@components";
+import { PATH_AUTH } from "@routes/paths";
 import { styledRegisterInput } from "@sections/on-boarding-register/styles";
 import { useTranslate } from "src/utils/translateHelper";
+
+import { RESER_PASS_SX, TYPO_CONT_SX, getButtonSx } from "./constants";
 
 interface Props {
   isSubmiting: boolean;
@@ -18,10 +29,12 @@ interface Props {
 export default function SingInPassword({
   previousStep,
   nextStep,
+  isActive,
   isSubmiting,
   isError,
   currentStep,
 }: Partial<StepWizardChildProps> & Props): React.ReactElement {
+  const theme = useTheme();
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isDisabledBtn, setIsDisabletBtn] = useState<boolean>(true);
   const translate = useTranslate();
@@ -38,6 +51,8 @@ export default function SingInPassword({
     }
   }, [currentStep]);
 
+  const buttonSx = useMemo(() => getButtonSx(theme), [theme]);
+
   return (
     <>
       <IconButton
@@ -50,15 +65,7 @@ export default function SingInPassword({
       >
         <MdArrowBackIosNew />
       </IconButton>
-      <Stack
-        direction="row"
-        sx={{
-          alignItems: "center",
-          ml: { xs: 3, sm: 3, md: 0 },
-          mt: 1,
-          mb: 4,
-        }}
-      >
+      <Stack direction="row" sx={TYPO_CONT_SX}>
         <Typography variant="h3">{translate("login_with_email")}</Typography>
         <Typography variant="h2" sx={{ ml: 1 }}>
           ✉️
@@ -71,6 +78,7 @@ export default function SingInPassword({
           label={translate("password")}
           type={showPassword ? "text" : "password"}
           sx={(theme) => ({ ...styledRegisterInput(theme) })}
+          inputRef={(input) => input && isActive && input.focus()}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -89,20 +97,18 @@ export default function SingInPassword({
             ),
           }}
         />
+        <Link
+          component={NextLink}
+          href={PATH_AUTH.resetPassword}
+          sx={RESER_PASS_SX}
+        >
+          {translate("login_reset_password")}
+        </Link>
         <LoadingButton
           type="submit"
           disabled={isDisabledBtn}
           loading={isSubmiting}
-          sx={(theme) => ({
-            background: "#43D4DD33",
-            color: "#43D4DD",
-            fontSize: "1.5rem",
-            mt: 4,
-            mb: 2,
-            "&:hover": {
-              background: theme.palette.mode === "light" ? "" : "#fff",
-            },
-          })}
+          sx={buttonSx}
         >
           {translate("login_lets_go")}
         </LoadingButton>

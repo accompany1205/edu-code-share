@@ -30,7 +30,7 @@ import { getAddTribeButtonSx } from "./constants";
 export default function MenuTribesList(): React.ReactElement {
   const theme = useTheme();
   const { themeLayout } = useSettingsContext();
-  const isMobile = useMediaQuery(theme.breakpoints.down(1200));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isNavMini = themeLayout === "mini" && !isMobile;
   const translate = useTranslate();
 
@@ -55,7 +55,7 @@ export default function MenuTribesList(): React.ReactElement {
     }
   }, [isLoading]);
   return (
-    <Stack>
+    <Stack sx={{ width: "100%" }}>
       {!isNavMini && (
         <Divider
           sx={{
@@ -94,7 +94,7 @@ export default function MenuTribesList(): React.ReactElement {
             >
               <Scrollbar sx={{ overflowX: "unset" }}>
                 <Stack
-                  pl={isNavMini ? 0 : 2}
+                  pl={2}
                   gap={1}
                   alignItems={isNavMini ? "center" : "start"}
                 >
@@ -113,10 +113,14 @@ export default function MenuTribesList(): React.ReactElement {
           </>
         )}
       </Stack>
-      {isNavMini ? (
-        <Divider sx={{ margin: "16px auto 8px", width: "24px" }} />
-      ) : (
-        <Divider sx={{ mt: 2, ml: 2, mb: 1.5 }} />
+      {!isNavMini && (
+        <Divider
+          sx={{
+            mb: 0,
+            mt: 2,
+            ml: 2,
+          }}
+        />
       )}
       <MenuPopover
         open={openPopover}

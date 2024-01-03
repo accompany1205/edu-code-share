@@ -304,7 +304,7 @@ const ar = {
   required_password_includes:
     "يجب أن تحتوي كلمة المرور على حرف واحد كبير وحرف صغير ورقم واحد",
   required_password_length: "يجب أن تتكون كلمة المرور من 10 أحرف على الأقل",
-  required_password_length_6: "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل",
+  required_password_length_8: "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل",
   required_password_number: "كلمة المرور تتطلب رقما",
   required_password_lowercase: "تتطلب كلمة المرور حرفًا صغيرًا",
   required_password_uppercase: "تتطلب كلمة المرور حرفًا كبيرًا",
@@ -673,6 +673,13 @@ const ar = {
   fullscreen: "تكبير الشاشة",
   fullscreen_exit: "الخروج من الشاشة الكاملة",
 
+  // reset_pass
+  reset_pass_page_title: "إعادة تعيين كلمة المرور",
+  reset_pass_title: "نسيت كلمة السر؟",
+  reset_pass_subtitle:
+    "يرجى إدخال عنوان البريد الإلكتروني المرتبط بحسابك وسنرسل إليك عبر البريد الإلكتروني رابطًا لإعادة تعيين كلمة المرور الخاصة بك.",
+  reset_pass_return_cta: "العودة لتسجيل الدخول",
+
   // login
   organization_setting: "إعدادات المنظمة",
   logout: "تسجيل خروج",
@@ -691,6 +698,7 @@ const ar = {
   login_my_first_time: "انها المرة الاولى لي هنا",
   login_sign_up_with_google: "قم بالتسجيل مع جوجل",
   login_register: "يسجل",
+  login_reset_password: "هل نسيت كلمة السر",
   login: "تسجيل الدخول",
   login_been_here: "لقد كنت هنا من قبل",
   login_register_as: "سجل باسم",
@@ -889,6 +897,10 @@ const ar = {
   go_to_gallery: "اذهب إلى المعرض",
   save_to_folder: "حفظ في' مجلدي'",
   open_folder: "افتح' مجلدي'",
+
+  // Code editor MuMu menu
+  code_editor_mumu_menu_tooltip:
+    "مرحبًا، أنا مومو. أنا هنا للمساعدة عندما تتعثر.",
 };
 
 export default ar;
