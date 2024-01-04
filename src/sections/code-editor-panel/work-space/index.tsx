@@ -78,6 +78,7 @@ const WorkSpace: FC<WorkSpaceProps> = ({
   const [document, setDocument] = useState<CodeDocument | null>(null);
 
   const onChangeCode = useCallback((doc: Record<string, string>) => {
+    console.log("onchangetext1", doc);
     setDocument(doc as CodeDocument);
   }, []);
 

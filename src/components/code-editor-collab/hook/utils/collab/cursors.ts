@@ -113,7 +113,7 @@ const getCursorField = (addCursor: StateEffectType<Cursor>, withTooltip: boolean
 	},
 	update(cursors, tr) {
 		let cursorTransacions = cursors.map(tr.changes);
-
+		
 		for (const e of tr.effects) if (e.is(addCursor)) {
 			const addUpdates = [];
 			if (!cursorsItems.has(e.value.id)) cursorsItems.set(e.value.id, cursorsItems.size);

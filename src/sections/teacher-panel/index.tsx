@@ -18,13 +18,13 @@ export const TeacherPanel = (): React.ReactElement => {
   const { query } = useRouter();
   const socket = useRef<Socket | undefined>();
 
-  const getSocket = useCallback(() => {
+  const getSocket = () => {
     if (socket.current) {
       return socket.current;
     }
     socket.current = io(process.env.NEXT_PUBLIC_CODE_STREAM_API ?? "", { path: "/api", auth: user ? { userId: user.id } : {} })
     return socket.current;
-  }, [socket]);
+  };
 
   const assignmentList = useGetAssignmentListStudentQuery({ class_id: query.id as string })
 

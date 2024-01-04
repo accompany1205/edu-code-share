@@ -37,10 +37,12 @@ const Navigation: FC<INavigation> = ({
 }) => {
   const theme = useTheme();
   const [btnNext, setBtnNext] = useState<BtnType>(BtnType.next);
+
   const nestedBox = useMemo(() => getNestedBoxSx(theme), [theme]);
+  const tooltipWrapperSx = useMemo(() => getTooltipWrapperSx(theme), [theme]);
+
   const stylePrev = useMemo(stylesPrev, []);
   const styleNext = useMemo(() => stylesNext(btnNext), [btnNext]);
-  const tooltipWrapperSx = useMemo(() => getTooltipWrapperSx(theme), [theme]);
 
   const getNextBtnType = useCallback((): void => {
     if (stepHasValidation) {

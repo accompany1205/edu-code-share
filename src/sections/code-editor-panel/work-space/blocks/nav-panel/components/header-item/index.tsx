@@ -20,6 +20,9 @@ const HeaderItem: FC<HeaderItemProps> = ({
   activeUsers,
   activeAdmins = 0,
 }) => {
+
+  console.log({ activeUsers })
+  console.log({ activeAdmins })
   return (
     <ListItem sx={LIST_ITEM_SX}>
       <ListItemIcon onClick={onClick}>

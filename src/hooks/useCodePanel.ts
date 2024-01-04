@@ -120,9 +120,9 @@ export const useCodePanel = (): UseCodePanelReturn => {
           .findIndex(lesson => lesson.id === query.lessonId) + 1
       )
       .reverse()
-      .find(
+      ?.find(
         lesson => lesson.contents
-          .find(
+          ?.find(
             content => content.progress
               ?.find(
                 progress => progress.progress_meta?.body.length > 0

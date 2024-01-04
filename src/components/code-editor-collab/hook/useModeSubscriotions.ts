@@ -39,6 +39,7 @@ export const useModeSubscriptions = ({
   const runInitSubOwnerRef = useRef(runInitSubOwner);
 
   const delayedOnChange = useCallback(pDebounce((doc) => {
+    console.log("onChange", doc);
     onChange?.(doc);
   }, CODE_CHANGE_DELAY), [onChange]);
 
