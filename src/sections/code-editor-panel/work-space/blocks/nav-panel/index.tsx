@@ -4,18 +4,19 @@ import { DndContext } from '@dnd-kit/core';
 import { useRouter } from "next/router";
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
+
+import { DndContext } from "@dnd-kit/core";
 import {
-  Drawer,
-  List,
-  Divider,
-  Stack,
-  CircularProgress
-} from "@mui/material";
-import SpeakerNotesOutlinedIcon from "@mui/icons-material/SpeakerNotesOutlined";
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+
 import EventNoteIcon from "@mui/icons-material/EventNote";
-import AssignmentIcon from "@mui/icons-material/Assignment";
+import SpeakerNotesOutlinedIcon from "@mui/icons-material/SpeakerNotesOutlined";
+import { CircularProgress, Divider, Drawer, List, Stack } from "@mui/material";
 
 import { SimpleInfiniteList } from "@components";
+import { useTranslate } from "src/utils/translateHelper";
 
 import { type BaseResponseInterface } from "@utils";
 import { type IFriend } from "src/redux/interfaces/friends.interface";
@@ -27,25 +28,24 @@ import NavItem from "./components/nav-item";
 import HeaderItem from "./components/header-item";
 import CutomNavItem from "./components/custom-nav-item";
 import CodeBlock from "./components/code-block";
-import SortableItem from "./components/sortable-item";
 import LoadListSkeleton from "./components/load-list-skeleton";
-
-
-import {
-  ICON_SX,
-  DIVIDER_SX,
-  STACK_SX,
-  MAIN_LIST,
-  LIST_SX,
-  getDrawerSx,
-  getStackCodeBoxSx,
-  DIVIDER_SX_BOTTOM
-} from "./styles"
+import SortableItem from "./components/sortable-item";
 import { useNavPanel } from "./hook";
 
+import {
+  DIVIDER_SX,
+  DIVIDER_SX_BOTTOM,
+  ICON_SX,
+  LIST_SX,
+  MAIN_LIST,
+  STACK_SX,
+  getDrawerSx,
+  getStackCodeBoxSx,
+} from "./styles";
+
 interface NavPanelProps {
-  cursorName?: string
-  wrapperListenerRef: RefObject<HTMLDivElement | null>
+  cursorName?: string;
+  wrapperListenerRef: RefObject<HTMLDivElement | null>;
 }
 
 const LOADER_SIZE = 20;
@@ -67,7 +67,7 @@ const NavPanel: FC<NavPanelProps> = ({ cursorName, wrapperListenerRef }) => {
     isCodeBlocksVisible,
     isUsersLoading,
     onLoadMore,
-    hasNextPage
+    hasNextPage,
   } = useNavPanel(wrapperListenerRef);
 
 
@@ -78,8 +78,10 @@ const NavPanel: FC<NavPanelProps> = ({ cursorName, wrapperListenerRef }) => {
   const room = useSelector((state: RootState) => state.codeEditorController.room);
   const roomId = room?.roomId || '';
 
+  const translate = useTranslate();
+
   const drawerSx = useMemo(() => {
-    return getDrawerSx(isOpen, isCodePreviewVisible)
+    return getDrawerSx(isOpen, isCodePreviewVisible);
   }, [isOpen, isCodePreviewVisible]);
 
   const stackCodeBoxSx = useMemo(() => {
@@ -146,15 +148,11 @@ const NavPanel: FC<NavPanelProps> = ({ cursorName, wrapperListenerRef }) => {
   }
 
   return (
-    <Drawer
-      ref={drawerRef}
-      open={isOpen}
-      variant="permanent"
-      sx={drawerSx}
-    >
+    <Drawer ref={drawerRef} open={isOpen} variant="permanent" sx={drawerSx}>
       <HeaderItem
         activeUsers={activeUsersAmount}
         onClick={() => setIsOpen(!isOpen)}
+        isOpen={isOpen}
       />
 
       <Divider sx={DIVIDER_SX} />
@@ -181,6 +179,7 @@ const NavPanel: FC<NavPanelProps> = ({ cursorName, wrapperListenerRef }) => {
               </SimpleInfiniteList>
             )
           }
+
         </List>
       </Stack>
 
@@ -188,21 +187,20 @@ const NavPanel: FC<NavPanelProps> = ({ cursorName, wrapperListenerRef }) => {
 
       <List sx={LIST_SX}>
         <CutomNavItem
+          isDisabled={true}
           icon={<SpeakerNotesOutlinedIcon sx={ICON_SX} />}
-          name="Group Chat"
-          onToggle={() => { setIsOpen(!isOpen); }}
+          name={translate("group_chat")}
+          onToggle={() => {
+            setIsOpen(!isOpen);
+          }}
         />
-
         <CutomNavItem
+          isDisabled={true}
           icon={<EventNoteIcon sx={ICON_SX} />}
-          name="Notes"
-          onToggle={() => { setIsOpen(!isOpen); }}
-        />
-
-        <CutomNavItem
-          icon={<AssignmentIcon sx={ICON_SX} />}
-          name="Sandbox"
-          onToggle={() => { setIsOpen(!isOpen); }}
+          name={translate("notes")}
+          onToggle={() => {
+            setIsOpen(!isOpen);
+          }}
         />
       </List>
 
@@ -223,14 +221,14 @@ const NavPanel: FC<NavPanelProps> = ({ cursorName, wrapperListenerRef }) => {
                       onChangeUserStatus={(status) => onChangeUserStatus(status)}
                     />
                   </SortableItem>
-                )
+                );
               })}
             </SortableContext>
           </DndContext>
         </Stack>
       )}
     </Drawer>
-  )
-}
+  );
+};
 
 export default NavPanel;

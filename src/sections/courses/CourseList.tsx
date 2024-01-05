@@ -1,5 +1,3 @@
-import { useEffect } from "react";
-
 import { Stack } from "@mui/material";
 
 import { EmptyContent, SimpleInfiniteList } from "@components";
@@ -7,21 +5,16 @@ import { DEFAULT_TAKE_PER_PAGE, FilterMode, useFilters } from "@hooks";
 import { ICourseSearchParams } from "src/redux/interfaces/content.interface";
 import { useGetCourseQuery } from "src/redux/services/manager/courses-student";
 import { useGetPublicCourseQuery } from "src/redux/services/public-student";
+import { useTranslate } from "src/utils/translateHelper";
 
 import CoursesItem from "./course-list-item/CourseItem";
 import SkeletonCourse from "./course-list-item/SkeletonCourse";
 
 interface Props {
   publicPage?: boolean;
-  setCounter?: (count: number) => void;
-  setIsLoading?: (loading: boolean) => void;
 }
 
-export default function CourseList({
-  publicPage,
-  setCounter,
-  setIsLoading,
-}: Props): React.ReactElement {
+export default function CourseList({ publicPage }: Props): React.ReactElement {
   const { filters, setFilter } = useFilters<ICourseSearchParams>(
     {
       name: "",
@@ -38,19 +31,14 @@ export default function CourseList({
     isLoading: publicIsLoading,
     isFetching: publicFetching,
   } = useGetPublicCourseQuery(filters, { skip: !publicPage });
-  useEffect(() => {
-    setIsLoading?.(publicPage ? publicIsLoading : isLoading);
-  }, [isLoading]);
+
+  const translate = useTranslate();
 
   const createSkeletonList = (): React.ReactElement[] => {
     return Array(DEFAULT_TAKE_PER_PAGE)
       .fill(null)
       .map((v, i) => <SkeletonCourse key={i + 14} />);
   };
-
-  if (data) {
-    setCounter?.(data.data.length);
-  }
 
   if ((!publicPage && isLoading) || (publicPage && publicIsLoading)) {
     return (
@@ -78,14 +66,14 @@ export default function CourseList({
               <CoursesItem course={el} key={el.id} />
             ))
           ) : (
-            <EmptyContent title="You dont have any course" />
+            <EmptyContent title={translate("courses_empty")} />
           )
         ) : isFetching ? (
           <>{createSkeletonList()}</>
         ) : data?.data.length ? (
           data?.data?.map((el) => <CoursesItem course={el} key={el.id} />)
         ) : (
-          <EmptyContent title="No Data" />
+          <EmptyContent title={translate("messages_no_data")} />
         )}
       </Stack>
     </SimpleInfiniteList>

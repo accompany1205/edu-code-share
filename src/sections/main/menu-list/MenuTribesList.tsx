@@ -21,6 +21,7 @@ import { STUDENT_PATH_DASHBOARD } from "@routes/student.paths";
 import RoleBasedGuard from "src/auth/RoleBasedGuard";
 import { Role } from "src/redux/services/enums/role.enum";
 import { useGetStudentClassesQuery } from "src/redux/services/manager/classes-student";
+import { useTranslate } from "src/utils/translateHelper";
 
 import JoinClassModal from "./JoinTribeModal";
 import TribeListItem from "./TribesListItem";
@@ -29,8 +30,9 @@ import { getAddTribeButtonSx } from "./constants";
 export default function MenuTribesList(): React.ReactElement {
   const theme = useTheme();
   const { themeLayout } = useSettingsContext();
-  const isMobile = useMediaQuery(theme.breakpoints.down(1200));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isNavMini = themeLayout === "mini" && !isMobile;
+  const translate = useTranslate();
 
   const [containerHeignt, setContainerHeignt] = useState("auto");
   const [openPopover, setOpenPopover] = useState<HTMLElement | null>(null);
@@ -53,7 +55,7 @@ export default function MenuTribesList(): React.ReactElement {
     }
   }, [isLoading]);
   return (
-    <Stack>
+    <Stack sx={{ width: "100%" }}>
       {!isNavMini && (
         <Divider
           sx={{
@@ -92,7 +94,7 @@ export default function MenuTribesList(): React.ReactElement {
             >
               <Scrollbar sx={{ overflowX: "unset" }}>
                 <Stack
-                  pl={isNavMini ? 0 : 2}
+                  pl={2}
                   gap={1}
                   alignItems={isNavMini ? "center" : "start"}
                 >
@@ -111,10 +113,14 @@ export default function MenuTribesList(): React.ReactElement {
           </>
         )}
       </Stack>
-      {isNavMini ? (
-        <Divider sx={{ margin: "16px auto 8px", width: "24px" }} />
-      ) : (
-        <Divider sx={{ mt: 2, ml: 2, mb: 1.5 }} />
+      {!isNavMini && (
+        <Divider
+          sx={{
+            mb: 0,
+            mt: 2,
+            ml: 2,
+          }}
+        />
       )}
       <MenuPopover
         open={openPopover}
@@ -132,14 +138,14 @@ export default function MenuTribesList(): React.ReactElement {
           >
             <MenuItem>
               <IoPeople size="20px" />
-              Create a group
+              {translate("tribes_create_group")}
             </MenuItem>
           </Link>
         </RoleBasedGuard>
         <JoinClassModal>
           <MenuItem>
             <FaCampground size="20px" />
-            Join a group
+            {translate("tribes_join_group")}
           </MenuItem>
         </JoinClassModal>
       </MenuPopover>
