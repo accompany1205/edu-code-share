@@ -87,10 +87,10 @@ const WorkSpace: FC<WorkSpaceProps> = ({
 
   const onChangeCode = (doc: Record<string, string>) => {
     try {
-      // console.log("onchangetext1", doc);
-      // console.log("onchangetext1 infomation", user);
-      // console.log("onchangetext1_:", user?.id);
-      // console.log("onchangetext1__:", router?.query?.lessonId);
+      console.log("onchangetext1", doc);
+      console.log("onchangetext1 infomation", user);
+      console.log("onchangetext1_:", user?.id);
+      console.log("onchangetext1__:", router?.query?.lessonId);
 
       if (checkValueTimeout) {
         // Clear the previous timeout if the value changes
@@ -105,7 +105,7 @@ const WorkSpace: FC<WorkSpaceProps> = ({
       checkValueTimeout = setTimeout(() => {
         if (doc?.htmlBody?.length === previousLength) {
           console.log(`Value after 30 seconds: ${doc} (unchanged)`);
-          socket.emit('changeStatusInLesson', { lesson: router.query.lessonId, user: user?.student_profile?.id, status: 'idle' });
+          socket.emit('changeStatusInLesson', { lesson: router.query.lessonId, user: user?.id, status: 'idle' });
         } else {
           console.log('Value has changed');
         }
