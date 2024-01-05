@@ -105,23 +105,6 @@ const NavPanel: FC<NavPanelProps> = ({ cursorName, wrapperListenerRef }) => {
     setUsers(_users);
   }, [usersStatus, users.length])
 
-  useEffect(() => {
-    console.log("second component:", socket);
-    socket.on("joinLesson_", (data: any) => {
-      console.log("joinLesson_ response");
-      const { lesson, user } = JSON.parse(data);
-      console.log("joinLesson:", { lesson, user });
-    });
-    socket.on("leaveLesson_", (data: any) => {
-      const [lesson, user] = JSON.parse(data);
-      console.log({ lesson, user });
-    });
-    return () => {
-      socket.off("joinLesson_");
-      socket.off("leaveLesson_");
-    };
-  }, []);
-
   const onChangeUserStatus = (status: string = 'active') => {
     try {
       console.log(socket);

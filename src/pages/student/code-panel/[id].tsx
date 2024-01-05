@@ -89,16 +89,7 @@ export default function Index(): React.ReactElement | null {
   const dispatch = useDispatch();
   const theme = useTheme();
   const boxProps = useMemo(() => getBoxProps(theme), [theme]);
-  const classId = typeof window !== 'undefined' ? localStorage.getItem('classId') : '';
-  const joinCode = typeof window !== 'undefined' ? localStorage.getItem('joinCode') : '';
 
-  console.log({ classId, joinCode });
-  const { data, isLoading } = useGetClassQuery(
-    { id: classId as string },
-    { skip: !classId || !!joinCode }
-  );
-
-  console.log({ data, isLoading })
   const { user } = useAuthContext();
   const [usersStatus, setUsersStatus] = useState<ILessonUserStatus[]>([]);
 
@@ -124,12 +115,7 @@ export default function Index(): React.ReactElement | null {
   //   return socket.current;
   // }, [socket]);
 
-  useEffect(() => {
-    if (data) {
-      console.log({ data });
-      dispatch(setClass(data));
-    }
-  }, [isLoading]);
+
 
   useEffect(() => {
     socket.on('connect', () => {
