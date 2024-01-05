@@ -4,6 +4,7 @@ import {
   Box,
   SpeedDial,
   SpeedDialAction,
+  Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
@@ -11,8 +12,10 @@ import {
 
 import SolutionMobileDialog from "@sections/code-editor-panel/top-bar/nav-bar/options/help-popup/options/solution-mobile-dialog";
 import UnstuckMobileDialog from "@sections/code-editor-panel/top-bar/nav-bar/options/help-popup/options/unstack-dialogs/UnstuckMobileDialog";
+import { useCodePanel } from "src/hooks/useCodePanel";
 import { useGetLessonStudentQuery } from "src/redux/services/manager/lesson-student";
 import { useSelector } from "src/redux/store";
+import { useTranslate } from "src/utils/translateHelper";
 
 import TipsPopover from "../tips-popover";
 import { IActionDialogType, actions, actionsTips } from "./config";
@@ -22,7 +25,6 @@ import {
   getSpeedDealFabProps,
   getSpeedDealStyles,
 } from "./constants";
-import { useCodePanel } from "src/hooks/useCodePanel";
 
 interface MumuSpeedDialProps {
   typing: boolean | null;
@@ -38,17 +40,15 @@ const MumuSpeedDial: FC<MumuSpeedDialProps> = ({ typing }) => {
   const [openPoper, setOpenPoper] = useState<boolean>(false);
   const [speedDeal, setSpeedDial] = useState<boolean>(false);
   const [dialogType, setDialogType] = useState<IActionDialogType | null>(null);
-
+  const translate = useTranslate();
   const lessonId = useSelector((state) => state.codePanelGlobal.lessonId);
   const slideIndex = useSelector((state) => state.codePanelGlobal.slideIndex);
   const {
-    workSpaceProps: {
-      data: workSpaceData
-    },
+    workSpaceProps: { data: workSpaceData },
   } = useCodePanel();
   const { data, isLoading } = useGetLessonStudentQuery({ id: lessonId });
 
-  const slideTips = (workSpaceData[slideIndex]?.tips ?? '').split('\n');
+  const slideTips = (workSpaceData[slideIndex]?.tips ?? "").split("\n");
 
   const speedDealProps = useMemo(
     () => getSpeedDealFabProps(speedDeal),
@@ -103,38 +103,43 @@ const MumuSpeedDial: FC<MumuSpeedDialProps> = ({ typing }) => {
           tips={[...(data?.tips ?? []), ...slideTips]}
         />
       )}
-
-      <SpeedDial
-        ref={popperRef}
-        aria-describedby={"popper"}
-        ariaLabel="SpeedDial basic example"
-        open={speedDeal}
-        onClose={closeSpeedDial}
-        onOpen={openSpeedDial}
-        FabProps={speedDealProps}
-        sx={speedDealStyles}
-        direction="up"
-        icon={<Box sx={BOX_PROPS} />}
+      <Tooltip
+        title={
+          <Typography>{translate("code_editor_mumu_menu_tooltip")}</Typography>
+        }
       >
-        {actionsList.map((action) => (
-          <SpeedDialAction
-            key={action.name}
-            icon={action.icon}
-            onClick={() => {
-              setDialogType(action.type);
-              if (action.type === IActionDialogType.tips) {
-                setOpenPoper(true);
+        <SpeedDial
+          ref={popperRef}
+          aria-describedby={"popper"}
+          ariaLabel="SpeedDial basic example"
+          open={speedDeal}
+          onClose={closeSpeedDial}
+          onOpen={openSpeedDial}
+          FabProps={speedDealProps}
+          sx={speedDealStyles}
+          direction="up"
+          icon={<Box sx={BOX_PROPS} />}
+        >
+          {actionsList.map((action) => (
+            <SpeedDialAction
+              key={action.name}
+              icon={action.icon}
+              onClick={() => {
+                setDialogType(action.type);
+                if (action.type === IActionDialogType.tips) {
+                  setOpenPoper(true);
+                }
+              }}
+              tooltipTitle={
+                <Typography sx={{ color: action.color, p: "2px" }}>
+                  {translate(action.name)}
+                </Typography>
               }
-            }}
-            tooltipTitle={
-              <Typography sx={{ color: action.color, p: "2px" }}>
-                {action.name}
-              </Typography>
-            }
-            FabProps={SPEED_DEAL_ACTION_FAB_PROPS}
-          />
-        ))}
-      </SpeedDial>
+              FabProps={SPEED_DEAL_ACTION_FAB_PROPS}
+            />
+          ))}
+        </SpeedDial>
+      </Tooltip>
       {/* commented before V1 release */}
       {/* <TipsMobileDialog
         open={dialogType === IActionDialogType.tips}

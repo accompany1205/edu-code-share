@@ -1,12 +1,15 @@
 import dynamic from "next/dynamic";
 import Head from "next/head";
 import { useRouter } from "next/router";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTheme } from "@mui/material/styles";
+import { type Theme, type SxProps } from "@mui/system";
 
 import { FullScreen } from "react-full-screen";
 import { Socket, io } from "socket.io-client";
 
-import { Box, Theme, useTheme } from "@mui/material";
+import { Box } from "@mui/material";
 
 import SkeletonCodePanel, {
   CPTopBarSkeleton,
@@ -59,6 +62,11 @@ const LessonsManager = dynamic(
 const CONFETI_GRAVITY = 0.25;
 const MAX_NUMBER_OF_PIECES = 500;
 const MIN_NUMBER_OF_PIECES = 0;
+const BOX_PROPS = {
+  position: "relative",
+  overflow: "hidden",
+};
+
 const getBoxProps = (theme: Theme) => ({
   bgcolor:
     theme.palette.mode === "light" ? "white" : theme.palette.background.neutral,
@@ -228,19 +236,27 @@ export default function Index(): React.ReactElement | null {
   }
 
   return (
+
     <SocketContext.Provider value={socket}>
       <LessonUserContext.Provider value={usersStatus}>
-        <Box>
-          <Head>
-            <title> CodePanel: CodeTribe </title>
-          </Head>
+      <Box>
+        <Head>
+          <title> CodePanel: CodeTribe </title>
+        </Head>
 
-          <FullScreen handle={handle}>
+        <FullScreen handle={handle}>
+          <Box
+            sx={(theme) => ({
+              background: theme.palette.background.default,
+            })}
+          >
+
             <Tour />
 
             <SignUpDialog isSigned={!!workSpaceProps.user} />
 
-            <Box sx={boxProps}>
+            <Box sx={BOX_PROPS}>
+
               <TopPanel
                 chatComponent={null}
                 onHanldeFullScreen={handle.active ? handle.exit : handle.enter}
@@ -256,19 +272,19 @@ export default function Index(): React.ReactElement | null {
                 }
               />
             </Box>
-
             {!isDesktop ? <ChatPopup chatComponent={null} /> : null}
-          </FullScreen>
+          </Box>
+        </FullScreen>
 
-          <Confetti
-            numberOfPieces={
-              confetti ? MAX_NUMBER_OF_PIECES : MIN_NUMBER_OF_PIECES
-            }
-            recycle={false}
-            gravity={CONFETI_GRAVITY}
-            onConfettiComplete={onConfettiComplete}
-          />
-        </Box>
+        <Confetti
+          numberOfPieces={
+            confetti ? MAX_NUMBER_OF_PIECES : MIN_NUMBER_OF_PIECES
+          }
+          recycle={false}
+          gravity={CONFETI_GRAVITY}
+          onConfettiComplete={onConfettiComplete}
+        />
+      </Box>
       </LessonUserContext.Provider>
     </SocketContext.Provider>
   );

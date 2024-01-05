@@ -1,6 +1,7 @@
-import { type FC } from 'react'
-import { useRouter } from 'next/router';
-import { useDispatch } from 'react-redux';
+import { type FC } from "react";
+
+import PersonIcon from "@assets/icons/PersonIcon";
+import { useDispatch } from "react-redux";
 
 import {
   Avatar,
@@ -11,19 +12,15 @@ import {
   useTheme,
 } from "@mui/material";
 
-import PersonIcon from '@assets/icons/PersonIcon';
-import CustomSwitch from "./custom-switch";
-
-import { STUDENT_PATH_DASHBOARD } from "@routes/student.paths";
+import { toggleCodePreview } from "src/redux/slices/code-panel-global";
 import { useSelector } from "src/redux/store";
 
-import { toggleCodePreview } from "src/redux/slices/code-panel-global";
-
+import CustomSwitch from "./custom-switch";
 import {
-  STACK_STYLES,
   AVATAR_STYLES,
-  STACK_GROUP_STYLES,
   GROUP_TITLE_STYLES,
+  STACK_GROUP_STYLES,
+  STACK_STYLES,
   TRIBE_NAME_STYLES,
 } from "./styles";
 
@@ -36,30 +33,25 @@ const GroupHeader: FC = () => {
   console.log({ tribe });
   const dispatch = useDispatch()
   const isCodePreviewVisible = useSelector((state) => state.codePanelGlobal.isCodePreviewVisible)
-  const { push } = useRouter()
 
   if (!isDesktop) {
     return null;
   }
 
   const onChange = () => {
-    dispatch(toggleCodePreview(!isCodePreviewVisible))
-  }
+    dispatch(toggleCodePreview(!isCodePreviewVisible));
+  };
 
-  const groupTitle = tribe && tribe.name.length > MAX_TRIBE_NAME_LENGTH
-    ? <Typography variant="subtitle2">{tribe.name}</Typography>
-    : '';
+  const groupTitle =
+    tribe && tribe.name.length > MAX_TRIBE_NAME_LENGTH ? (
+      <Typography variant="subtitle2">{tribe.name}</Typography>
+    ) : (
+      ""
+    );
 
   return (
-    <Stack
-      sx={STACK_STYLES}
-      direction="row"
-    >
-      <Avatar
-        alt="avatar"
-        src={tribe?.avatar ?? ""}
-        sx={AVATAR_STYLES}
-      >
+    <Stack sx={STACK_STYLES} direction="row">
+      <Avatar alt="avatar" src={tribe?.avatar ?? ""} sx={AVATAR_STYLES}>
         🤖
       </Avatar>
 
@@ -75,21 +67,11 @@ const GroupHeader: FC = () => {
         </Tooltip>
       </Stack>
 
-      <PersonIcon
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        onClick={() => {
-          push(STUDENT_PATH_DASHBOARD.class.id(tribe?.id ?? ''))
-        }}
-      />
+      <PersonIcon display="flex" justifyContent="center" alignItems="center" />
 
-      <CustomSwitch
-        isActive={isCodePreviewVisible}
-        onChange={onChange}
-      />
+      <CustomSwitch isActive={isCodePreviewVisible} onChange={onChange} />
     </Stack>
   );
-}
+};
 
-export default GroupHeader
+export default GroupHeader;

@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { SlArrowDown, SlArrowUp } from "react-icons/sl";
 
-import { Button, Stack, Typography } from "@mui/material";
+import { Button, Stack, Typography, useTheme } from "@mui/material";
 
 import { Image } from "@components";
+import { useTranslate } from "src/utils/translateHelper";
 
 import CourseSummarily from "./CourseSummarily.1";
 import {
@@ -32,9 +33,14 @@ export default function CourseInfo({
   lessonsCount,
   level,
 }: ICourseInfoProps): React.ReactElement {
+  const theme = useTheme();
   const [open, setOpen] = useState(false);
+  const translate = useTranslate();
+
+  const containerStyles = useMemo(() => getCourseInfoWrapperSx(theme), [theme]);
+
   return (
-    <Stack sx={(theme) => ({ ...getCourseInfoWrapperSx(theme) })}>
+    <Stack sx={containerStyles}>
       <Stack maxWidth="680px">
         <Typography variant="h3" pb={2}>
           {name}
@@ -50,7 +56,9 @@ export default function CourseInfo({
             setOpen(!open);
           }}
         >
-          {open ? "Show less" : "See more"}
+          {open
+            ? translate("actions_show_less")
+            : translate("actions_see_more")}
           {open ? (
             <SlArrowUp style={{ marginLeft: "10px" }} />
           ) : (

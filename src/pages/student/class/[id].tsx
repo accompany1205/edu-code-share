@@ -14,6 +14,7 @@ import { useGetClassQuery } from "src/redux/services/manager/classes-student";
 import { useGetPublicTribeQuery } from "src/redux/services/public/tribe-public";
 import { setClass } from "src/redux/slices/code-panel";
 import { useDispatch } from "src/redux/store";
+import { useTranslate } from "src/utils/translateHelper";
 
 HomeOverview.getLayout = (page: React.ReactElement) => (
   <StudentDashboardLayout>{page}</StudentDashboardLayout>
@@ -23,7 +24,7 @@ export default function HomeOverview(): React.ReactElement {
   const dispatch = useDispatch();
   const { themeStretch } = useSettingsContext();
   const { query } = useRouter();
-  
+
   localStorage.setItem("classId", query.id as string);
   localStorage.setItem("joinCode", query.joinCode as string);
 
@@ -31,6 +32,8 @@ export default function HomeOverview(): React.ReactElement {
     { id: query.id as string },
     { skip: !query.id || !!query.joinCode }
   );
+  const translate = useTranslate();
+
   const { data: classInfo } = useGetPublicTribeQuery(
     {
       joinCode: query.joinCode as string,
@@ -49,7 +52,7 @@ export default function HomeOverview(): React.ReactElement {
   return (
     <>
       <Head>
-        <title>Home Overview | Code Tribe</title>
+        <title> {translate("home_overview")} | Code Tribe</title>
       </Head>
       {classInfo ? (
         <JoinTribeModal classInfo={classInfo} isSignIn={true} />
