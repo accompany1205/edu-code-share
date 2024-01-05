@@ -23,11 +23,14 @@ export default function HomeOverview(): React.ReactElement {
   const dispatch = useDispatch();
   const { themeStretch } = useSettingsContext();
   const { query } = useRouter();
+  
+  localStorage.setItem("classId", query.id as string);
+  localStorage.setItem("joinCode", query.joinCode as string);
+
   const { data, isLoading } = useGetClassQuery(
     { id: query.id as string },
     { skip: !query.id || !!query.joinCode }
   );
-
   const { data: classInfo } = useGetPublicTribeQuery(
     {
       joinCode: query.joinCode as string,
@@ -35,6 +38,8 @@ export default function HomeOverview(): React.ReactElement {
     { skip: !query.joinCode }
   );
 
+
+  console.log("homeOverView:", data);
   useEffect(() => {
     if (data) {
       dispatch(setClass(data));

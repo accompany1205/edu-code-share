@@ -24,7 +24,7 @@ import {
   AVATAR_STYLES,
   STACK_GROUP_STYLES,
   GROUP_TITLE_STYLES,
-  TRIBE_NAME_STYLES, 
+  TRIBE_NAME_STYLES,
 } from "./styles";
 
 const MAX_TRIBE_NAME_LENGTH = 23;
@@ -33,6 +33,7 @@ const GroupHeader: FC = () => {
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up(1000));
   const tribe = useSelector((state) => state.codePanel.class);
+  console.log({ tribe });
   const dispatch = useDispatch()
   const isCodePreviewVisible = useSelector((state) => state.codePanelGlobal.isCodePreviewVisible)
   const { push } = useRouter()
@@ -41,13 +42,13 @@ const GroupHeader: FC = () => {
     return null;
   }
 
-  const onChange= () => {
+  const onChange = () => {
     dispatch(toggleCodePreview(!isCodePreviewVisible))
   }
 
-  const groupTitle =  tribe && tribe.name.length > MAX_TRIBE_NAME_LENGTH
-  ? <Typography variant="subtitle2">{tribe.name}</Typography>
-  : '';
+  const groupTitle = tribe && tribe.name.length > MAX_TRIBE_NAME_LENGTH
+    ? <Typography variant="subtitle2">{tribe.name}</Typography>
+    : '';
 
   return (
     <Stack

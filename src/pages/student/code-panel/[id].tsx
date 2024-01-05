@@ -13,8 +13,11 @@ import SkeletonCodePanel, {
 } from "@sections/code-editor-panel/skeleton";
 import WorkSpace from "@sections/code-editor-panel/work-space";
 import { useCodePanel } from "src/hooks/useCodePanel";
+import { useDispatch } from "src/redux/store";
+import { setClass } from "src/redux/slices/code-panel";
 
 import { useAuthContext } from "../../../auth/useAuthContext";
+import { useGetClassQuery } from "src/redux/services/manager/classes-student";
 import { SocketContext } from "../../../context/socket-context";
 import { LessonUserContext } from "../../../context/lesson-context";
 import SignUpDialog from "./sign-up-dialog";
@@ -75,8 +78,19 @@ export default function Index(): React.ReactElement | null {
     lessonManagerProps,
   } = useCodePanel();
 
+  const dispatch = useDispatch();
   const theme = useTheme();
   const boxProps = useMemo(() => getBoxProps(theme), [theme]);
+  const classId = typeof window !== 'undefined' ? localStorage.getItem('classId') : '';
+  const joinCode = typeof window !== 'undefined' ? localStorage.getItem('joinCode') : '';
+
+  console.log({ classId, joinCode });
+  const { data, isLoading } = useGetClassQuery(
+    { id: classId as string },
+    { skip: !classId || !!joinCode }
+  );
+
+  console.log({ data, isLoading })
   const { user } = useAuthContext();
   const [usersStatus, setUsersStatus] = useState<ILessonUserStatus[]>([]);
 
@@ -101,6 +115,13 @@ export default function Index(): React.ReactElement | null {
   //   console.log(socket.current)
   //   return socket.current;
   // }, [socket]);
+
+  useEffect(() => {
+    if (data) {
+      console.log({ data });
+      dispatch(setClass(data));
+    }
+  }, [isLoading]);
 
   useEffect(() => {
     socket.on('connect', () => {
