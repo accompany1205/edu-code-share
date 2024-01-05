@@ -3,6 +3,7 @@ import { type FC, useCallback, useRef, useState } from "react";
 import { FaDesktop } from "react-icons/fa";
 import { TiDocumentText } from "react-icons/ti";
 import { useDispatch } from "react-redux";
+import { useRouter } from "next/router";
 import SwipeableViews from "react-swipeable-views";
 
 import { useTheme } from "@mui/material/styles";
@@ -19,6 +20,8 @@ import {
   toggleBrowser,
   toggleInstrations,
 } from "src/redux/slices/code-panel-global";
+import { useSocket } from "@hooks";
+import { useAuthContext } from "src/auth/useAuthContext";
 import { setTab } from "src/redux/slices/mobile-tab-manager";
 import { useSelector } from "src/redux/store";
 
@@ -49,6 +52,9 @@ export interface WorkSpaceProps {
   lastLessonCode?: string;
 }
 
+let previousLength: number | null = null;
+let checkValueTimeout: any | null = null;
+
 const WorkSpace: FC<WorkSpaceProps> = ({
   lesson,
   onSubmitChalange,
@@ -61,6 +67,8 @@ const WorkSpace: FC<WorkSpaceProps> = ({
   lastLessonCode,
 }) => {
   const theme = useTheme();
+  const socket = useSocket();
+  const router = useRouter();
   const isDesktop = useMediaQuery(theme.breakpoints.up(1000));
   const dispatch = useDispatch();
   const wrapperRef = useRef<HTMLDivElement | null>(null);
@@ -77,10 +85,37 @@ const WorkSpace: FC<WorkSpaceProps> = ({
 
   const [document, setDocument] = useState<CodeDocument | null>(null);
 
-  const onChangeCode = useCallback((doc: Record<string, string>) => {
-    console.log("onchangetext1", doc);
-    setDocument(doc as CodeDocument);
-  }, []);
+  const onChangeCode = (doc: Record<string, string>) => {
+    try {
+      // console.log("onchangetext1", doc);
+      // console.log("onchangetext1 infomation", user);
+      // console.log("onchangetext1_:", user?.id);
+      // console.log("onchangetext1__:", router?.query?.lessonId);
+
+      if (checkValueTimeout) {
+        // Clear the previous timeout if the value changes
+        clearTimeout(checkValueTimeout);
+      }
+
+      previousLength = doc?.htmlBody?.length; // Store the current value
+      if (router.query.lessonId && user)
+        socket.emit('changeStatusInLesson', { lesson: router.query.lessonId, user: user?.id, status: 'active' });
+
+      // Set up the check for 30 seconds later
+      checkValueTimeout = setTimeout(() => {
+        if (doc?.htmlBody?.length === previousLength) {
+          console.log(`Value after 30 seconds: ${doc} (unchanged)`);
+          socket.emit('changeStatusInLesson', { lesson: router.query.lessonId, user: user?.student_profile?.id, status: 'idle' });
+        } else {
+          console.log('Value has changed');
+        }
+      }, 30000); // 30 seconds
+
+      setDocument(doc as CodeDocument);
+    } catch (error) {
+      console.log("Error: ", error);
+    }
+  };
 
   const openInstruction = () => {
     dispatch(toggleInstrations(false));
