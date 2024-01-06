@@ -1,6 +1,8 @@
 import { type FC } from "react";
 
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { useSelector } from "react-redux";
+import { RootState } from "src/redux/store";
 
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import {
@@ -29,7 +31,7 @@ const HeaderItem: FC<HeaderItemProps> = ({
 }) => {
 
   const translate = useTranslate();
-
+  const tribe = useSelector((state: RootState) => state.codePanel.class);
 
   return (
     <ListItem sx={LIST_ITEM_SX}>
@@ -40,7 +42,7 @@ const HeaderItem: FC<HeaderItemProps> = ({
       </ListItemIcon>
 
       <Stack sx={STACK_SX}>
-        <Typography sx={TITLE_SX}>{translate("quick_rabbits")}</Typography>
+        <Typography sx={TITLE_SX}>{tribe?.name}</Typography>
 
         <Stack direction="row">
           <Badge sx={BADGE_SX} badgeContent={""} color="success">
