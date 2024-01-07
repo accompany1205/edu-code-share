@@ -67,6 +67,19 @@ const CodeEditorBlock: FC<ICodeEditorBlock> = ({
     }, deley);
   };
 
+  const onChange = (_code: Record<string, string>) => {
+    onChangeCode(_code);
+    dispatch(
+      setRoom({
+        roomId: user?.id as string,
+        cursorText: user?.first_name as string,
+        preloadedCode: preloadedCodeRef.current,
+        code: _code.htmlBody[0] ?? "",
+        mode: EditorMode.Owner,
+      })
+    );
+  }
+
   useEffect(() => {
     typingListener(FIRST_LOADING_DELEY, true);
   }, []);
@@ -111,7 +124,7 @@ const CodeEditorBlock: FC<ICodeEditorBlock> = ({
         <Checkers checkers={mapValidations(code ?? "", validations)} />
       )}
 
-      <CodeEditorController onChange={onChangeCode} />
+      <CodeEditorController onChange={(_code: Record<string, string>) => onChange(_code)} />
 
       <Box sx={{ display: isDesktop ? "none" : "block" }}>
         <Collapse in={codingSymbols} timeout={!codingSymbols ? 0 : TIMEOUT}>
@@ -129,8 +142,7 @@ const CodeEditorBlock: FC<ICodeEditorBlock> = ({
 const getTitleStyles = (isDesktop: boolean): string => {
   return `
   .cm-editor{
-    height: calc(100vh - ${
-      isDesktop ? DESKTOP_HEIGHT : MOBILE_HEIGHT
+    height: calc(100vh - ${isDesktop ? DESKTOP_HEIGHT : MOBILE_HEIGHT
     }px)!important;
   }
   .cm-scroller::-webkit-scrollbar{

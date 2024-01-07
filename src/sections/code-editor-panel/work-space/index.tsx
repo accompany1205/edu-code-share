@@ -1,9 +1,10 @@
-import { type FC, useCallback, useRef, useState } from "react";
+import { type FC, useCallback, useRef, useState, useEffect } from "react";
 
 import { FaDesktop } from "react-icons/fa";
 import { TiDocumentText } from "react-icons/ti";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/router";
+import { setRoom } from "src/redux/slices/code-editor-controller";
 import SwipeableViews from "react-swipeable-views";
 
 import { useTheme } from "@mui/material/styles";
@@ -32,6 +33,7 @@ import NavPanel from "./blocks/nav-panel";
 import SliderBlock from "./blocks/slider-block";
 import ViewBlock from "./blocks/view-block";
 import { CodeDocument } from "./blocks/view-block/browser-view";
+import { EditorMode } from "src/components/code-editor-collab/hook/constants";
 
 export type SupportedLang = "html" | "javascript";
 
@@ -85,27 +87,48 @@ const WorkSpace: FC<WorkSpaceProps> = ({
     (state) => state.codePanelGlobal.isInstructionsHidden
   );
 
-  const [document, setDocument] = useState<CodeDocument | null>(null);
+  console.log("onchangetext1 localStorage", window.localStorage.getItem(`code-${user?.id}-${router?.query?.lessonId}`));
+  // const [document, setDocument] = useState<CodeDocument | null>(null);
+  const [document, setDocument] = useState<CodeDocument | null>({
+    htmlBody: [window.localStorage.getItem(`code-${user?.id}-${router?.query?.lessonId}`) || ""],
+  });
+
+  useEffect(() => {
+    dispatch(
+      setRoom({
+        roomId: user?.id as string,
+        cursorText: user?.first_name as string,
+        preloadedCode: "",
+        code: window.localStorage.getItem(`code-${user?.id}-${router?.query?.lessonId}`) || "",
+        mode: EditorMode.Owner,
+      })
+    );
+  })
+
 
   const onChangeCode = (doc: Record<string, string>) => {
     try {
       console.log("onchangetext1", doc);
+      console.log("onchangetext1", previousLength);
       console.log("onchangetext1 infomation", user);
       console.log("onchangetext1_:", user?.id);
       console.log("onchangetext1__:", router?.query?.lessonId);
+      if (typeof window !== 'undefined' && !(previousLength != 1 && doc?.htmlBody[0]?.length === 0)) {
+        localStorage.setItem(`code-${user?.id}-${router?.query?.lessonId}`, doc.htmlBody[0]);
+      }
 
       if (checkValueTimeout) {
         // Clear the previous timeout if the value changes
         clearTimeout(checkValueTimeout);
       }
 
-      previousLength = doc?.htmlBody?.length; // Store the current value
+      previousLength = doc?.htmlBody[0]?.length; // Store the current value
       if (router.query.lessonId && user)
         socket.emit('changeStatusInLesson', { lesson: router.query.lessonId, user: user?.id, status: 'active' });
 
       // Set up the check for 30 seconds later
       checkValueTimeout = setTimeout(() => {
-        if (doc?.htmlBody?.length === previousLength) {
+        if (doc?.htmlBody[0]?.length === previousLength) {
           console.log(`Value after 30 seconds: ${doc} (unchanged)`);
           socket.emit('changeStatusInLesson', { lesson: router.query.lessonId, user: user?.id, status: 'idle' });
         } else {

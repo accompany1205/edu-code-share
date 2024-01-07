@@ -23,9 +23,11 @@ export const CodeEditorControllerSlice = createSlice({
   initialState,
   reducers: {
     setRoom: (state, action: PayloadAction<CodeEditorControllerRoom | null>) => {
+      console.log("setRoom", action.payload);
       state.room = action.payload;
     },
     resetRoom: (state) => {
+      console.log("resetRoom");
       state.room = emptyRoom;
     }
   },

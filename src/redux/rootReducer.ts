@@ -48,7 +48,7 @@ export const rootPersistConfig = {
   key: "root",
   storage,
   keyPrefix: "redux-",
-  whitelist: ['codePanel'],
+  whitelist: ['codePanel', 'codeEditorController'],
 };
 
 const rootReducer = combineReducers({

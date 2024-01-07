@@ -64,6 +64,7 @@ export const RealTimeEditor = memo(
     }
 
     const initializeConnection = useCallback(async () => {
+      // console.log("asdfasdfasdfasdf: ", window.localStorage?.getItem(`code-${userId}-${query.lessonId}`))
       socket.emit("create", userId, query.lessonId, window.localStorage?.getItem(`code-${query.id}-${query.lessonId}`) ?? "");
       await initializeData();
     }, [socket, initializeData, query.id, query.lessonId]);
