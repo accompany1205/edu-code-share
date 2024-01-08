@@ -126,8 +126,8 @@ const CodeEditorCollab: FC<CodeEditorCollabProps> = ({
         theme="dark"
         extensions={extensions}
         readOnly={isReadOnly}
-        value={code}
-        onChange={(e: string) => {
+        value={doc}
+        onChange={(e) => {
           console.log("code-editor-collab", e);
           onChangeCode(e)
         }}

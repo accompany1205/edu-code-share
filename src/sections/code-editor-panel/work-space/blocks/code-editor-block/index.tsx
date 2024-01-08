@@ -68,6 +68,7 @@ const CodeEditorBlock: FC<ICodeEditorBlock> = ({
   };
 
   const onChange = (_code: Record<string, string>) => {
+    console.log({ _code });
     if (_code?.htmlBody[0].length === 0) return;
     onChangeCode(_code);
     dispatch(
