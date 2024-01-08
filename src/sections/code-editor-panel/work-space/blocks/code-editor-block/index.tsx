@@ -68,6 +68,7 @@ const CodeEditorBlock: FC<ICodeEditorBlock> = ({
   };
 
   const onChange = (_code: Record<string, string>) => {
+    if (_code?.htmlBody[0].length === 0) return;
     onChangeCode(_code);
     dispatch(
       setRoom({
@@ -100,7 +101,7 @@ const CodeEditorBlock: FC<ICodeEditorBlock> = ({
         roomId: user?.id as string,
         cursorText: user?.first_name as string,
         preloadedCode: preloadedCodeRef.current,
-        code: codeRef.current,
+        code: code,
         mode: EditorMode.Owner,
       })
     );

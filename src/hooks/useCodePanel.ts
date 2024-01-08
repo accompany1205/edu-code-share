@@ -73,7 +73,11 @@ export const useCodePanel = (): UseCodePanelReturn => {
   const handle = useFullScreenHandle();
 
   const [confetti, setConfetti] = useState(false);
-  const [code, setCode] = useState<string>("");
+  const [code, setCode] = useState<string>(
+    window.localStorage.getItem(
+      `code-${user?.student_profile?.id}-${query?.lessonId}`
+    ) ?? ""
+  );
 
   const [lastVisitedData, setLastVisitedData] = useState<LastVisitedState>({
     unitId: null,
@@ -85,8 +89,18 @@ export const useCodePanel = (): UseCodePanelReturn => {
 
   const onChangeCode = useCallback(
     (code: string) => {
-      setCode(code);
-      window.localStorage.setItem(`code-${query.id}`, code);
+      setCode(
+        code.length > 0
+          ? code
+          : window.localStorage.getItem(
+              `code-${user?.student_profile?.id}-${query?.lessonId}`
+            ) ?? ""
+      );
+
+      window.localStorage.setItem(
+        `code-${user?.student_profile?.id}-${query?.lessonId}`,
+        code
+      );
     },
     [query.id]
   );
@@ -111,8 +125,7 @@ export const useCodePanel = (): UseCodePanelReturn => {
   const { data: module } = useGetModuleWithLessonsQuery(
     { id: query.unitId as string },
     { skip: !query.unitId }
-  )
-
+  );
 
   const lastLessonCode = useMemo(
     () =>
@@ -245,11 +258,14 @@ export const useCodePanel = (): UseCodePanelReturn => {
   };
 
   useEffect(() => {
-    if (query.id) {
-      const savedCode = window?.localStorage.getItem(`code-${query.id}`);
+    if (query.lessonId) {
+      const savedCode =
+        window?.localStorage.getItem(
+          `code-${user?.student_profile?.id}-${query?.lessonId}`
+        ) ?? "";
       setCode(savedCode ?? "");
     }
-  }, [query.id]);
+  }, [query.lessonId]);
 
   useEffect(() => {
     setLastVisitedData({

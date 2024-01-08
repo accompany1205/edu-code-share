@@ -28,7 +28,8 @@ interface CodeEditorCollabProps extends Omit<UseCodeEditorCollabProps, ReducedFi
   socket: Socket
   isMultipleExtensionFiles?: boolean
   defaultFileName?: string
-  onChangeCode?:(value: string)=>void
+  onChangeCode?: (value: string) => void
+  code?: string
 }
 
 const CodeEditorCollab: FC<CodeEditorCollabProps> = ({
@@ -41,6 +42,7 @@ const CodeEditorCollab: FC<CodeEditorCollabProps> = ({
   isMultipleExtensionFiles = false,
   defaultFileName = "index.html",
   onChangeCode = voidFunction,
+  code = "",
   ...otherProps
 }) => {
   const styles = useStyles();
@@ -124,8 +126,11 @@ const CodeEditorCollab: FC<CodeEditorCollabProps> = ({
         theme="dark"
         extensions={extensions}
         readOnly={isReadOnly}
-        value={doc}
-        onChange={(e) => onChangeCode(e)}
+        value={code}
+        onChange={(e: string) => {
+          console.log("code-editor-collab", e);
+          onChangeCode(e)
+        }}
       />
     </div>
   )

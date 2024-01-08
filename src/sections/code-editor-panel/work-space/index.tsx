@@ -65,6 +65,7 @@ const WorkSpace: FC<WorkSpaceProps> = ({
   data,
   user,
   code,
+  onChangeCode,
   language,
   isFetching = false,
   lastLessonCode,
@@ -88,25 +89,17 @@ const WorkSpace: FC<WorkSpaceProps> = ({
   );
 
   console.log("onchangetext1 localStorage", window.localStorage.getItem(`code-${user?.id}-${router?.query?.lessonId}`));
+  console.log("onchangetext1 localStorage code", code);
   // const [document, setDocument] = useState<CodeDocument | null>(null);
   const [document, setDocument] = useState<CodeDocument | null>({
-    htmlBody: [window.localStorage.getItem(`code-${user?.id}-${router?.query?.lessonId}`) || ""],
+    htmlBody: [code],
   });
 
   useEffect(() => {
-    dispatch(
-      setRoom({
-        roomId: user?.id as string,
-        cursorText: user?.first_name as string,
-        preloadedCode: "",
-        code: window.localStorage.getItem(`code-${user?.id}-${router?.query?.lessonId}`) || "",
-        mode: EditorMode.Owner,
-      })
-    );
-  })
+    console.log("work-space:", document?.htmlBody?.join("") ?? "")
+  }, [])
 
-
-  const onChangeCode = (doc: Record<string, string>) => {
+  const _onChangeCode = (doc: Record<string, string>) => {
     try {
       console.log("onchangetext1", doc);
       console.log("onchangetext1", previousLength);
@@ -137,6 +130,7 @@ const WorkSpace: FC<WorkSpaceProps> = ({
       }, 30000); // 30 seconds
 
       setDocument(doc as CodeDocument);
+      onChangeCode(doc?.htmlBody[0] ?? "");
     } catch (error) {
       console.log("Error: ", error);
     }
@@ -160,7 +154,7 @@ const WorkSpace: FC<WorkSpaceProps> = ({
             data={data}
             integrations={lesson?.integrations ?? []}
             isFetching={isFetching}
-            code={document?.htmlBody?.join("") ?? ""}
+            code={code}
           />
         ) : (
           <HidedTabBtn
@@ -173,9 +167,9 @@ const WorkSpace: FC<WorkSpaceProps> = ({
         <CodeEditorBlock
           preloadedCode={lastLessonCode || data[slideIndex]?.preload_body || ""}
           validations={data[slideIndex]?.validations || ""}
-          code={document?.htmlBody?.join("") ?? ""}
+          code={code}
           user={user}
-          onChangeCode={onChangeCode}
+          onChangeCode={_onChangeCode}
         />
 
         {!isBrowserHidden ? (
@@ -209,12 +203,12 @@ const WorkSpace: FC<WorkSpaceProps> = ({
         data={data}
         integrations={lesson?.integrations ?? []}
         isFetching={isFetching}
-        code={document?.htmlBody?.join("") ?? ""}
+        code={code}
       />
 
       <CodeEditorBlock
-        code={document?.htmlBody?.join("") ?? ""}
-        onChangeCode={onChangeCode}
+        code={code}
+        onChangeCode={_onChangeCode}
         user={user}
         preloadedCode={lastLessonCode ?? data[slideIndex]?.preload_body}
         validations={data[slideIndex]?.validations}
