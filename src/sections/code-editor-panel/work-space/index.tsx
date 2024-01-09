@@ -65,7 +65,6 @@ const WorkSpace: FC<WorkSpaceProps> = ({
   data,
   user,
   code,
-  onChangeCode,
   language,
   isFetching = false,
   lastLessonCode,
@@ -88,27 +87,15 @@ const WorkSpace: FC<WorkSpaceProps> = ({
     (state) => state.codePanelGlobal.isInstructionsHidden
   );
 
-  console.log("onchangetext1 localStorage", window.localStorage.getItem(`code-${user?.id}-${router?.query?.lessonId}`));
-  console.log("onchangetext1 localStorage code", code);
-  // const [document, setDocument] = useState<CodeDocument | null>(null);
-  const [document, setDocument] = useState<CodeDocument | null>({
-    htmlBody: [code],
-  });
+  const [document, setDocument] = useState<CodeDocument | null>(null);
 
   useEffect(() => {
     console.log("work-space:", document?.htmlBody?.join("") ?? "")
   }, [])
 
-  const _onChangeCode = (doc: Record<string, string>) => {
+  const onChangeCode = (doc: Record<string, string>) => {
     try {
       console.log("onchangetext1", doc);
-      console.log("onchangetext1", previousLength);
-      console.log("onchangetext1 infomation", user);
-      console.log("onchangetext1_:", user?.id);
-      console.log("onchangetext1__:", router?.query?.lessonId);
-      if (typeof window !== 'undefined' && !(previousLength != 1 && doc?.htmlBody[0]?.length === 0)) {
-        localStorage.setItem(`code-${user?.id}-${router?.query?.lessonId}`, doc.htmlBody[0]);
-      }
 
       if (checkValueTimeout) {
         // Clear the previous timeout if the value changes
@@ -130,7 +117,7 @@ const WorkSpace: FC<WorkSpaceProps> = ({
       }, 30000); // 30 seconds
 
       setDocument(doc as CodeDocument);
-      onChangeCode(doc?.htmlBody[0] ?? "");
+
     } catch (error) {
       console.log("Error: ", error);
     }
@@ -169,7 +156,7 @@ const WorkSpace: FC<WorkSpaceProps> = ({
           validations={data[slideIndex]?.validations || ""}
           code={code}
           user={user}
-          onChangeCode={_onChangeCode}
+          onChangeCode={onChangeCode}
         />
 
         {!isBrowserHidden ? (
@@ -208,7 +195,7 @@ const WorkSpace: FC<WorkSpaceProps> = ({
 
       <CodeEditorBlock
         code={code}
-        onChangeCode={_onChangeCode}
+        onChangeCode={onChangeCode}
         user={user}
         preloadedCode={lastLessonCode ?? data[slideIndex]?.preload_body}
         validations={data[slideIndex]?.validations}

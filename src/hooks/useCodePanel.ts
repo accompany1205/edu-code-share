@@ -73,11 +73,7 @@ export const useCodePanel = (): UseCodePanelReturn => {
   const handle = useFullScreenHandle();
 
   const [confetti, setConfetti] = useState(false);
-  const [code, setCode] = useState<string>(
-    window.localStorage.getItem(
-      `code-${user?.student_profile?.id}-${query?.lessonId}`
-    ) ?? ""
-  );
+  const [code, setCode] = useState<string>("");
 
   const [lastVisitedData, setLastVisitedData] = useState<LastVisitedState>({
     unitId: null,
@@ -89,18 +85,9 @@ export const useCodePanel = (): UseCodePanelReturn => {
 
   const onChangeCode = useCallback(
     (code: string) => {
-      setCode(
-        code.length > 0
-          ? code
-          : window.localStorage.getItem(
-              `code-${user?.student_profile?.id}-${query?.lessonId}`
-            ) ?? ""
-      );
+      setCode(code);
 
-      window.localStorage.setItem(
-        `code-${user?.student_profile?.id}-${query?.lessonId}`,
-        code
-      );
+      window.localStorage.setItem(`code--${query?.id}`, code);
     },
     [query.id]
   );

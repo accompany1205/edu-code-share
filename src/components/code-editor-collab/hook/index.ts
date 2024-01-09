@@ -220,10 +220,10 @@ export const useCodeEditorCollab = ({
     initialize[modeRef.current](firstInit.current);
   }, [initialize]);
 
-  useEffect(() => {
-    window.addEventListener("beforeunload", clearSocketData);
-    return () => { clearSocketData(); };
-  }, [clearSocketData]);
+  // useEffect(() => {
+  //   window.addEventListener("beforeunload", clearSocketData);
+  //   return () => { clearSocketData(); };
+  // }, [clearSocketData]);
 
   return {
     editorRef,
